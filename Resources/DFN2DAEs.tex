@@ -3,18 +3,26 @@
 \usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
 \usepackage{fullpage}
 \usepackage{graphicx}
+\usepackage{color, colortbl}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{epstopdf}
+\allowdisplaybreaks
 
 \newcommand{\real}{{\mathbb{R}}}
 \newcommand{\Id}{{\mathbb{I}}}
 \newcommand{\xdot}{\dot{x}}
+\newcommand{\eff}{\text{eff}}
+\providecommand{\sep}{\ensuremath{\rm{sep}}}
 \newcommand{\pard}[2]{\frac{\partial #1}{\partial #2}}
+
+\newcommand{\red}[1]{{\color{red}#1}}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\green}[1]{{\color{green}#1}}
 
 \title{Numerical Implementation of the Doyle-Fuller-Newman (DFN) Model}
 \author{{\normalsize Prof. Scott Moura} $\mid$ {\normalsize Energy, Controls, and Applications Lab (eCAL) $\mid$ UC Berkeley}}
-\date{{\normalsize IN PROGRESS $\mid$ \today}}                                           % Activate to display a given date or no date
+\date{{\normalsize LAST UPDATED $\mid$ \today}}                                           % Activate to display a given date or no date
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
@@ -31,14 +39,15 @@ In this note we document the numerical implementation of the DFN model.
 We consider the Doyle-Fuller-Newman (DFN) model in Fig. \ref{fig:dfn-schematic} to predict the evolution of lithium concentration in the solid $c_{s}^{\pm}(x,r,t)$, lithium concentration in the electrolyte $c_{e}(x,t)$, solid electric potential $\phi_{s}^{\pm}(x,t)$, electrolyte electric potential $\phi_{e}(x,t)$, ionic current $i_{e}^{\pm}(x,t)$, molar ion fluxes $j_{n}^{\pm}(x,t)$, and bulk cell temperature $T(t)$ \cite{Thomas2002}. The governing equations are given by
 \begin{eqnarray}
 	\frac{\partial c_{s}^{\pm}}{\partial t}(x,r,t) &=& \frac{1}{r^{2}} \frac{\partial}{\partial r} \left[ D_{s}^{\pm} r^{2} \frac{\partial c_{s}^{\pm}}{\partial r}(x,r,t) \right], \label{eqn:cs} \\
-	\frac{\partial c_{e}}{\partial t}(x,t) &=& \frac{\partial}{\partial x} \left[ D_{e} \frac{\partial c_{e}}{\partial x}(x,t) + \frac{1 - t_{c}^{0}}{\varepsilon_{e} F} i_{e}^{\pm}(x,t) \right], \label{eqn:ce} \\
-	0 &=& \frac{\partial \phi_{s}^{\pm}}{\partial x}(x,t) - \frac{i_{e}^{\pm}(x,t) - I(t)}{\sigma^{\pm}}, \label{eqn:phis} \\
-	0 &=& \frac{\partial \phi_{e}}{\partial x}(x,t) + \frac{i_{e}^{\pm}(x,t)}{\kappa} - \frac{2RT}{F}(1 - t_{c}^{0}) \times \left(1 + \frac{d \ln f_{c/a}}{d \ln c_{e}}(x,t) \right) \frac{\partial \ln c_{e}}{\partial x}(x,t), \label{eqn:phie} \quad \\
-	0 &=& \frac{\partial i_{e}^{\pm}}{\partial x}(x,t) - a_{s} F j_{n}^{\pm}(x,t), \label{eqn:ie} \\
+	 \varepsilon_{e}^{j} \frac{\partial c_{e}^{j}}{\partial t}(x,t) &=& \frac{\partial}{\partial x} \left[D_{e}^{\text{eff}}(c_{e}^{j}) \frac{\partial c_{e}^{j}}{\partial x}(x,t) + \frac{1 - t_{c}^{0}}{F} i_{e}^{j}(x,t) \right], \ \label{eqn:ce} \\
+	0 &=& \frac{\partial \phi_{s}^{\pm}}{\partial x}(x,t) - \frac{i_{e}^{\pm}(x,t) - I(t)}{\sigma^{\text{eff},\pm}}, \label{eqn:phis} \\
+	0 &=& \kappa^{\text{eff}}(c_{e}) \cdot \frac{\partial \phi_{e}}{\partial x}(x,t) + i_{e}^{\pm}(x,t) \nonumber \\
+	0 &=& \frac{\partial i_{e}^{\pm}}{\partial x}(x,t) - a_{s}^{\pm} F j_{n}^{\pm}(x,t), \label{eqn:ie} \\
+	&& - \kappa^{\text{eff}}(c_{e}) \cdot \frac{2RT}{F}(1 - t_{c}^{0}) \times \left(1 + \frac{d \ln f_{c/a}}{d \ln c_{e}}(x,t) \right) \frac{\partial \ln c_{e}}{\partial x}(x,t), \label{eqn:phie}  \quad \\
 	0 &=& \frac{1}{F} i_{0}^{\pm}(x,t) \left[e^{\frac{\alpha_{a}F}{RT} \eta^{\pm}(x,t)} - e^{-\frac{\alpha_{c}F}{RT} \eta^{\pm}(x,t)} \right] - j_{n}^{\pm}(x,t), \label{eqn:bv} \\
-	\rho^{\textrm{avg}} c_{P} \frac{dT}{dt}(t) &=& h_{\textrm{cell}} \left[ T_{\textrm{amb}}(t) - T(t) \right] + I(t) V(t) -\int_{0^{-}}^{0^{+}} a_{s} F j_{n}(x,t) \Delta T(x,t) dx,
+	\rho^{\textrm{avg}} c_{P} \frac{dT}{dt}(t) &=& h_{\textrm{cell}} \left[ T_{\textrm{amb}}(t) - T(t) \right] + I(t) V(t) -\int_{0^{-}}^{0^{+}} a_{s} F j_{n}(x,t) \Delta T(x,t) dx, \label{eqn:T}
 \end{eqnarray}
-where $D_{e}, \kappa, f_{c/a}$ are functions of $c_{e}(x,t)$ and
+where $D_{e}, \kappa, f_{c/a}$ are functions of $c_{e}(x,t)$ and \noindent $D_{e}^{\text{eff}} = D_{e}(c_{e}) \cdot (\varepsilon_{e}^{j})^{\text{brug}}$, $\sigma^{\text{eff}} = \sigma \cdot (\varepsilon_{s}^{j} + \varepsilon_{f}^{j})^{\text{brug}}$, $\kappa^{\text{eff}} = \kappa(c_{e}) \cdot (\varepsilon_{e}^{j})^{\text{brug}}$ are the effective electrolyte diffusivity, effective solid conductivity, and effective electrolyte conductivity given by the Bruggeman relationship. We also have
 \begin{eqnarray}
 	i_{0}^{\pm}(x,t) &=& k^{\pm}  \left[ c_{ss}^{\pm}(x,t) \right]^{\alpha_{c}} \left[c_{e}(x,t) \left(c_{s,\max}^{\pm} - c_{ss}^{\pm}(x,t)  \right) \right]^{\alpha_{a}}, \label{eqn:i0} \\
 	\eta^{\pm}(x,t) &=& \phi_{s}^{\pm}(x,t) - \phi_{e}(x,t) - U^{\pm}(c_{ss}^{\pm}(x,t)) - F R_{f}^{\pm} j_{n}^{\pm}(x,t), \label{eqn:eta} \\
@@ -56,8 +65,8 @@ where $D_{e}, \kappa, f_{c/a}$ are functions of $c_{e}(x,t)$ and
 
 Along with these equations are corresponding boundary and initial conditions. The boundary conditions for the solid-phase diffusion PDE (\ref{eqn:cs}) are
 \begin{eqnarray}
-	\frac{\partial c_{s}^{\pm}}{\partial r}(x,0,t) &=& 0, \\
-	\frac{\partial c_{s}^{\pm}}{\partial r}(x,R_{s}^{\pm},t) &=& -\frac{1}{D_{s}^{\pm}} j_{n}^{\pm}.
+	\frac{\partial c_{s}^{\pm}}{\partial r}(x,0,t) &=& 0, \label{eqn:cs-bc1} \\
+	\frac{\partial c_{s}^{\pm}}{\partial r}(x,R_{s}^{\pm},t) &=& -\frac{1}{D_{s}^{\pm}} j_{n}^{\pm} \label{eqn:cs-bc2}.
 \end{eqnarray}
 The boundary conditions for the electrolyte-phase diffusion PDE (\ref{eqn:ce}) are given by
 \begin{align}
@@ -83,9 +92,15 @@ The boundary conditions for the ionic current ODE (\ref{eqn:ie}) are given by
 \end{equation}
 and also note that $i_{e}(x,t) = I(t)$ for $x \in [0^{\textrm{sep}}, L^{\textrm{sep}}]$.
 
-The input to the model is the applied current density $I(t)$, and the output is the voltage measured across the current collectors
+In addition, the parameters $D_s^{\pm}, D_e, \kappa_e, k^{\pm}$ vary with temperature via the Arrhenius relationship:
+\begin{equation}\label{eqn:arrhenius}
+	\psi = \psi_{ref} \exp \left[\frac{E_\psi}{R} \left( \frac{1}{T} - \frac{1}{T_{ref}} \right) \right]
+\end{equation}
+where $\psi$ represents a temperature dependent parameter, $E_{\psi}$ is the activation energy [J/mol], and $\psi_{ref}$ is the reference parameter value at reference temperature $T_{ref}$.
+
+The input to the model is the applied current density  $I(t)$ [A/m$^{2}$], and the output is the voltage measured across the current collectors
 \begin{equation}\label{eqn:voltage}
-	V(t) = \phi^{+}_{s}(0^{+},t) - \phi_{s}^{-}(0^{-},t)
+	V(t) = \phi^{+}_{s}(0^{+},t) - \phi_{s}^{-}(0^{-},t) - R_c I(t)
 \end{equation}
 Further details, including notation definitions, can be found in \cite{Thomas2002,Chaturvedi2010}.
 
@@ -124,6 +139,7 @@ J &=
 \end{array}
 \right]
 \end{align}
+The analytic Jacobian is computed in two functions: (i) Function \texttt{jac\_dfn\_pre.m} computes Jacobian elements that are NOT state/time-dependent. (ii) Function \texttt{jac\_dfn.m} computes Jacobian elements that are state/time-dependent.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{DAEs}\label{sec:daes}
@@ -149,7 +165,7 @@ In the subsequent sections, we go through each DFN variable listed in Table \ref
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Solid Concentration, $c_{s}^{-}, c_{s}^{+}$}\label{sec:cs}
-[DONE] The PDEs (\ref{eqn:cs}) governing Fickian diffusion in the solid phase are implemented using third order Pad\'{e} approximations of the two transfer functions from $j_{n}^{\pm}$ to $c_{ss}^{\pm}$ and $\overline{c}_{s}^{\pm}$. 
+\red{[NEEDS REVISION TO REFLECT JORDAN FORM]} The PDEs (\ref{eqn:cs}) and BCs (\ref{eqn:cs-bc1})-(\ref{eqn:cs-bc2}) governing Fickian diffusion in the solid phase are implemented using third order Pad\'{e} approximations of the two transfer functions from $j_{n}^{\pm}$ to $c_{ss}^{\pm}$ and $\overline{c}_{s}^{\pm}$. 
 \begin{eqnarray}
 	\frac{C_{ss}^{\pm}(s)}{J_{n}^{\pm}(s)} &=& \frac{-\frac{21}{R_{s}^{\pm}}s^{2} -\frac{1260 D_{s}^{\pm}}{(R_{s}^{\pm})^{3}}s -\frac{10395 (D_{s}^{\pm})^{2}}{ (R_{s}^{\pm})^{4} }  }{s^{3} + \frac{189 D_{s}^{\pm}}{(R_{s}^{\pm})^{2}} s^{2} + \frac{3465 (D_{s}^{\pm})^{2}}{(R_{s}^{\pm})^{4}} s }, \\
 	\frac{\overline{C}_{s}^{\pm}(s)}{J_{n}^{\pm}(s)} &=& \frac{-3 R_{s}^{\pm}}{s}.
@@ -210,7 +226,7 @@ for each discrete point in $x$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Electrolyte Concentration, $c_{e}$}\label{sec:ce}
-[DONE] The electrolyte concentration is implemented using the central difference method, which ultimately produces the matrix differential equation:
+\red{[NEEDS REVISION, FOR CONCENTRATION DEPENDENT DIFFUSIVITY AND BCS]} The electrolyte concentration PDE (\ref{eqn:ce}) and BCs (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented using the central difference method, which ultimately produces the matrix differential equation:
 \begin{equation}
 	\frac{d}{dt} c_{e}(t) = A_{ce}(c_{e,x}) \cdot c_{e}(t) + B_{ce}(c_{e,x}) \cdot i_{e,x}(t)
 \end{equation}
@@ -361,7 +377,7 @@ The boundary conditions (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented as
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Temperature, $T$}\label{sec:T}
-[DONE] Temperature is scalar, so the ODE is directly implemented as:
+\green{[DONE]} Temperature is scalar, so the ODE (\ref{eqn:T}) is directly implemented as:
 \begin{eqnarray}
 \rho^{\textrm{avg}} c_{P} \frac{dT}{dt}(t) &=& h_{\textrm{cell}} \left[ T_{\textrm{amb}}(t) - T(t) \right] + I(t) V(t) -\int_{0^{-}}^{0^{+}} a_{s} F j_{n}(x,t) \Delta T(x,t) dx, \\
 \Delta T(x,t) &=& U^{\pm}(\overline{c}^{\pm}_{s}(x,t)) - T(t) \frac{\partial U^{\pm}}{\partial T}(\overline{c}^{\pm}_{s}(x,t)), \\
@@ -370,10 +386,10 @@ The boundary conditions (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented as
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Solid Potential, $\phi_{s}^{-}, \phi_{s}^{+}$}\label{sec:phis}
-[DONE] The solid potential is implemented using the central difference method, which ultimately produces the matrix equation:
+\green{[DONE]} The solid potential ODE (\ref{eqn:phis}) and BCs (\ref{eqn:phis-bc}) are implemented using the central difference method, which ultimately produces the matrix equation:
 \begin{eqnarray}
-	\frac{d}{dt} \phi_{s}^{-}(t) &=& F^{1}_{psn} \ \phi_{s}^{-}(t) + F^{2}_{psn} \ i_{e,aug}^{-}(t) + G_{psn} \ I(t) \\
-	\frac{d}{dt} \phi_{s}^{+}(t) &=& F^{1}_{psp} \ \phi_{s}^{+}(t) + F^{2}_{psp} \ i_{e,aug}^{+}(t) + G_{psp} \ I(t).
+	\frac{d}{dt} \phi_{s}^{-}(t) &=& F^{1}_{psn} \ \phi_{s}^{-}(t) + F^{2}_{psn} \ i_{e,aug}^{-}(t) + G_{psn} \ I(t) = 0 \\
+	\frac{d}{dt} \phi_{s}^{+}(t) &=& F^{1}_{psp} \ \phi_{s}^{+}(t) + F^{2}_{psp} \ i_{e,aug}^{+}(t) + G_{psp} \ I(t) = 0.
 \end{eqnarray}
 where $i_{e,aug}^{\pm}$ are 
 \begin{equation}\label{eqn:i_ex}
@@ -398,20 +414,20 @@ This section also computes the terminal voltage $V(t)$ from (\ref{eqn:voltage}) 
 \begin{eqnarray}
 	\phi_{s,bc}^{-}(t) &=& C_{psn} \ \phi_{s}^{-}(t) + D_{psn} \ I(t), \\
 	\phi_{s,bc}^{+}(t) &=& C_{psp} \ \phi_{s}^{+}(t) + D_{psp} \ I(t), \\
-	V(t) &=& \phi_{s,bc,2}^{+}(t) - \phi_{s,bc,1}^{-}(t)
+	V(t) &=& \phi_{s,bc,2}^{+}(t) - \phi_{s,bc,1}^{-}(t) - R_c I(t)
 \end{eqnarray}
 where the following matrices are computed a priori by Matlab function \texttt{phi\_s\_mats.m}
 \begin{align}
 	(F1n) &= (M1n) - (M2n) (N2n)^{-1} (N1n), \\
 	(F2n) &= (M3n), \\
-	(Gn) &= 1 - (M2n) (N2n)^{-1} (N4n), \\
+	(Gn) &= (M4n) - (M2n) (N2n)^{-1} (N3n), \\
 	(F1p) &= (M1p) - (M2p)(N2p)^{-1}(N1p), \\
 	(F2p) &= (M3p), \\
-	(Gp) &= 1 - (M2p)(N2p)^{-1}(N4p), \\
+	(Gp) &= (M4p) - (M2p)(N2p)^{-1}(N3p), \\
 	(Cn) &= -(N2n)^{-1}(N1n), \\
-	(Dn) &= -(N2n)^{-1}(N4n), \\
+	(Dn) &= -(N2n)^{-1}(N3n), \\
 	(Cp) &= -(N2p)^{-1}(N1p), \\
-	(Dp) &= -(N2p)^{-1}(N4p),
+	(Dp) &= -(N2p)^{-1}(N3p),
 \end{align}
 where the $(Mij)$ and $N(ij)$ matrices result from central difference approximations of the ODE in space (\ref{eqn:phis}) and boundary conditions (\ref{eqn:phis-bc}).
 \begin{align}
@@ -436,7 +452,7 @@ where the $(Mij)$ and $N(ij)$ matrices result from central difference approximat
  0 & \alpha_{j} \\
 \end{array}
 \right], \qquad \\
-(M3j) &=
+(M3j) &= \frac{1}{\sigma^{\text{ref},\pm}}
 \left[
 \begin{array}{cccccc}
  0 & -1 & 0 & \ldots & & 0  \\
@@ -445,29 +461,30 @@ where the $(Mij)$ and $N(ij)$ matrices result from central difference approximat
  0 & 0 & \cdots & -1 & 0 & 0 \\
  0 & 0 & \cdots & 0 & -1 & 0 \\
 \end{array}
-\right], \quad \\
+\right], \quad
+(M4j) = \frac{1}{\sigma^{\text{ref},\pm}} \mathbb{I} \\
 (N1j) &=
 \left[
-\begin{array}{ccccc}
- 2\alpha_{j} & 0 & 0 & \ldots & 0  \\
- 0 & 0 & 0 & \ldots & -2\alpha_{j}  \\
+\begin{array}{cccccc}
+ 4\alpha_{j} & -\alpha_{j} & 0 & \ldots & 0 & 0  \\
+ 0 & 0 & 0 & \ldots & 1\alpha_{j} & -4\alpha_{j}  \\
 \end{array}
 \right], \quad
 (N2j) = 
 \left[
 \begin{array}{cc}
- -2\alpha_{j} & 0 \\
- 0 & 2\alpha_{j} \\
+ -3\alpha_{j} & 0 \\
+ 0 & 3\alpha_{j} \\
 \end{array}
 \right], \\
-(N4n) &= 
+(N3n) &= 
 \left[
 \begin{array}{c}
   1 \\
   0
 \end{array}
 \right], \quad
-(N4n) = 
+(N3p) = 
 \left[
 \begin{array}{c}
   0 \\
@@ -475,12 +492,12 @@ where the $(Mij)$ and $N(ij)$ matrices result from central difference approximat
 \end{array}
 \right]
 \end{align}
-for $j \in \{n,p\}$, $\alpha_{j} = \sigma^{j} / (2 L^{j} \Delta x^{j})$.
+for $j \in \{n,p\}$, $\alpha_{j} = 1 / (2 L^{j} \Delta x^{j})$. Note, we have used second-order accurate finite difference approximations for the boundary conditions.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Electrolyte Current, $i_{e}^{-}, i_{e}^{+}$}\label{sec:ie}
-[DONE] The electrolyte current is implemented using the central difference method, which ultimately produces the matrix equation:
+\green{[DONE]} The electrolyte current ODE (\ref{eqn:ie}) and BCs (\ref{eqn:ie-bcs}) are implemented using the central difference method, which ultimately produces the matrix equation:
 \begin{eqnarray}
 	\frac{d}{dt} i_{e}^{-}(t) &=& F^{1-}_{ien} \ i_{e}^{-}(t) + F^{2-}_{ien} \ j_{n}^{-}(t) + F^{3-}_{ien} \ I(t) \\
 	\frac{d}{dt} i_{e}^{+}(t) &=& F^{1+}_{iep} \ i_{e}^{+}(t) + F^{2+}_{iep} \ j_{n}^{+}(t) + F^{3+}_{iep} \ I(t)
@@ -546,15 +563,15 @@ for $j \in \{n,p\}$, $\alpha_{j} = (2 L^{j} \Delta x^{j})^{-1}$, $\beta_{j} = a_
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Electrolyte Potential, $\phi_{e}$}\label{sec:phie}
-The electrolyte potential is implemented using the central difference method, which ultimately produces the matrix equation:
+\red{[INCOMPLETE]} The electrolyte potential is implemented using the central difference method, which ultimately produces the matrix equation:
 \begin{equation}
 	\frac{d}{dt} \phi_{e}^{-}(t) = F^{1}_{pe}(c_{e,x}) \cdot \phi_{e}(t) + F^{2}_{pe}(c_{e,x}) \cdot i_{e,x}(t) + F^{3}_{pe}(c_{e,x}) \cdot \ln(c_{e,x}(t)) 
 \end{equation}
 where vectors $i_{e,x}, c_{e,x}$ are given by (\ref{eqn:iex}),(\ref{eqn:cex}). Note that the system matrices $F^{1}_{pe}, F^{2}_{pe}, F^{3}_{pe}$ are state-varying.  These state matrices are computed online by Matlab function \texttt{phi\_e\_mats.m} as follows
 \begin{eqnarray}
-	F^{1}_{pe} &=& (M1) - (M2)(N2)^{-1}(N1), \\
-	F^{2}_{pe} &=& (M3) - (M2)(N2)^{-1}(N3), \\
-	F^{3}_{pe} &=& (M4) - (M2)(N2)^{-1}(N4)
+	F^{1}_{pe} &=& \kappa^{\eff} \cdot (M1) + (M2)(C), \\
+	F^{2}_{pe} &=& (M3), \\
+	F^{3}_{pe} &=& \kappa^{\eff}_D \cdot (M4)
 \end{eqnarray}
 
 DO BOUNDARY CONDITIONS NEXT
@@ -568,7 +585,7 @@ where the $0$ is $\beta^{j}$ and $\gamma$ arises when $\frac{d \ln f_{c/a}}{d \l
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Molar ion fluxes, i.e. Butler-Volmer Current, $j_{n}^{-}, j_{n}^{+}$}\label{sec:jn}
-[DONE] Since the Butler-Volmer equation (\ref{eqn:bv}) is algebraic, and we always assume $\alpha_{a} = \alpha_{c} = 0.5 = \alpha$, it is trivially implemented as:
+\green{[DONE]} Since the Butler-Volmer equation (\ref{eqn:bv}) is algebraic, and we always assume $\alpha_{a} = \alpha_{c} = 0.5 = \alpha$, it is trivially implemented as:
 
 \begin{eqnarray}
 	\frac{d}{dt} j_{n}^{-}(t) &=& \frac{2}{F} i_{0}^{-}(t) \sinh \left[ \frac{\alpha F}{RT} \eta^{-}(t) \right] - j_{n}^{-}(t), \\
@@ -581,7 +598,58 @@ where
 \end{eqnarray}
 for each discrete point in x, in the electrodes only. Note that $\frac{d}{dt} j_{n}^{\pm}(t)$ is a dummy variable used to save the corresponding element of vector $g(x,z,t)$.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Nomenclature}
+See Table \ref{tbl:nomenclature}.
 
+\renewcommand{\arraystretch}{1.1}
+\begin{table}[h]
+\caption{Symbol Definitions}
+\begin{center}
+\begin{tabular}{c | p{0.75\linewidth}}
+\multicolumn{2}{c}{Symbols in order of appearance} \\ [1ex]
+\hline \hline
+\multicolumn{2}{c}{\textbf{Electrochemical model states, inputs, outputs}} \\
+\hline
+$c_{s}^{\pm}$ & Lithium concentration in solid phase [mol/m$^{3}$] \\
+$c_{e}$ & Lithium concentration in electrolyte phase [mol/m$^{3}$] \\
+$\phi_{s}^{\pm}$ & Solid electric potential [V] \\
+$\phi_{e}$ & Electrolyte electric potential [V] \\
+$i_{e}^{\pm}$ & Ionic current [A/m$^{2}$] \\
+$j_{n}^{\pm}$ & Molar ion flux [mol/m$^{2}$-s] \\
+$i_{0}^{\pm}$ & Exchange current density [A/m$^{2}$] \\
+$\eta^{\pm}$ & Overpotential [V] \\
+$c_{ss}^{\pm}$ & Lithium concentration at solid particle surface [mol/m$^{3}$] \\
+$\theta^{\pm}$ & Normalized surface concentration $c_{ss}^{\pm}/c_{s,\max}^{\pm}$ [-] \\
+$I$ & Applied current [A/m$^{2}$] \\
+$V$ & Terminal voltage [V] \\
+\hline
+\multicolumn{2}{c}{\textbf{Electrochemical model parameters}} \\
+\hline
+$D_{s}^{\pm}$, $D_{e}$ & Diffusivity of solid, electrolyte phase [m$^{2}$/s] \\
+$t_{c}^{0}$ & Transference number [-] \\
+$\varepsilon_{s}^{\pm}$, $\varepsilon_{e}$ & Volume fraction of solid, electrolyte phase [-] \\
+$F$ & Faraday's constant [C/mol] \\
+$\sigma^{\pm}$ & Conductivity of solid [1/$\Omega$-m] \\
+$\kappa$ & Conductivity of electrolyte [1/$\Omega$-m] \\
+$R$ & Universal gas constant [J/mol-K] \\
+$T$ & Temperature [K] \\
+$f_{c/a}$ & Mean molar activity coefficient in electrolyte [-] \\
+$a^{\pm}$ & Specific interfacial surface area [m$^{2}$/m$^{3}$] \\
+$\alpha_{a}, \alpha_{c}$ & Anodic, cathodic charge transfer coefficient [-] \\
+$k^{\pm}$ & Kinetic reaction rate [(A/m$^{2}$)(mol$^{3}$/mol)$^{(1+\alpha)}$] \\
+$c_{s,\max}^{\pm}$ & Maximum concentration of solid material [mol/m$^{3}$] \\
+$U^{\pm}$ & Open circuit potential of solid material [V] \\
+$R_{f}^{\pm}$ & Solid-electrolyte interphase film resistance [$\Omega$-m$^{2}$]\\
+$R_{c}$ & Resistance of connectors, current collectors [$\Omega$-m$^{2}$]\\
+$R_{s}^{\pm}$ & Particle radius in solid phase [m]\\
+$L^{j}$ & Length of region $j \in \{-,\sep,+\}$ \\
+$E_\psi$ & Activation energy of parameter $\psi$, [J/mol] \\
+\hline \hline
+\end{tabular}
+\end{center}
+\label{tbl:nomenclature}
+\end{table}%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{IEEEtran}

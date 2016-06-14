@@ -56,9 +56,6 @@ phi_e = z(2*Nnp+1:2*Nnp+Nx+2);
 jn = z(2*Nnp+Nx+3 : 2*Nnp+Nx+2+Nn);
 jp = z(2*Nnp+Nx+2+Nn+1 : end);
 
-% Temperature
-T = x(end);
-
 %% Li Diffusion in Solid Phase: c_s(x,r,t)
 
 % Anode LTI System

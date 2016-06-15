@@ -2,7 +2,7 @@
 %   Created May 22, 2012 by Scott Moura
 %   State-dependent elements
 
-function [f_x_full, f_z_full, g_x_full, g_z_full, varargout] = jac_dfn_federico(x,z,Cur,f_x,f_z,g_x,g_z,p)
+function [f_x_full, f_z_full, g_x_full, g_z_full, varargout] = jac_dfn(x,z,Cur,f_x,f_z,g_x,g_z,p)
 
 
 %% Parse out states

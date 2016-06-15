@@ -32,4 +32,14 @@ N.~A. Chaturvedi, R.~Klein, J.~Christensen, J.~Ahmed, and A.~Kojic,
   ``Algorithms for advanced battery-management systems,'' \emph{IEEE Control
   Systems Magazine}, vol.~30, no.~3, pp. 49 -- 68, 2010.
 
+\bibitem{Forman2011a}
+J.~C. Forman, S.~Bashash, J.~L. Stein, and H.~K. Fathy, ``Reduction of an
+  electrochemistry-based li-ion battery model via quasi-linearization and pade
+  approximation,'' \emph{Journal of the Electrochemical Society}, vol. 158,
+  no.~2, pp. A93 -- A101, 2011.
+
+\bibitem{Rahn2012}
+C.~D. Rahn and C.-Y. Wang, \emph{Battery Systems Engineering}.\hskip 1em plus
+  0.5em minus 0.4em\relax John Wiley \& Sons, 2012.
+
 \end{thebibliography}

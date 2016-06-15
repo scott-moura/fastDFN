@@ -13,6 +13,7 @@
 \newcommand{\Id}{{\mathbb{I}}}
 \newcommand{\xdot}{\dot{x}}
 \newcommand{\eff}{\text{eff}}
+\newcommand{\brug}{\text{brug}}
 \providecommand{\sep}{\ensuremath{\rm{sep}}}
 \newcommand{\pard}[2]{\frac{\partial #1}{\partial #2}}
 
@@ -165,12 +166,25 @@ In the subsequent sections, we go through each DFN variable listed in Table \ref
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Solid Concentration, $c_{s}^{-}, c_{s}^{+}$}\label{sec:cs}
-\red{[NEEDS REVISION TO REFLECT JORDAN FORM]} The PDEs (\ref{eqn:cs}) and BCs (\ref{eqn:cs-bc1})-(\ref{eqn:cs-bc2}) governing Fickian diffusion in the solid phase are implemented using third order Pad\'{e} approximations of the two transfer functions from $j_{n}^{\pm}$ to $c_{ss}^{\pm}$ and $\overline{c}_{s}^{\pm}$. 
-\begin{eqnarray}
-	\frac{C_{ss}^{\pm}(s)}{J_{n}^{\pm}(s)} &=& \frac{-\frac{21}{R_{s}^{\pm}}s^{2} -\frac{1260 D_{s}^{\pm}}{(R_{s}^{\pm})^{3}}s -\frac{10395 (D_{s}^{\pm})^{2}}{ (R_{s}^{\pm})^{4} }  }{s^{3} + \frac{189 D_{s}^{\pm}}{(R_{s}^{\pm})^{2}} s^{2} + \frac{3465 (D_{s}^{\pm})^{2}}{(R_{s}^{\pm})^{4}} s }, \\
-	\frac{\overline{C}_{s}^{\pm}(s)}{J_{n}^{\pm}(s)} &=& \frac{-3 R_{s}^{\pm}}{s}.
-\end{eqnarray}
-These transfer functions are converted into controllable canonical state-space form , thus producing the subsystem:
+\green{[DONE]} The PDEs (\ref{eqn:cs}) and BCs (\ref{eqn:cs-bc1})-(\ref{eqn:cs-bc2}) governing Fickian diffusion in the solid phase are implemented using third order Pad\'{e} approximations of the transfer function from $j_{n}^{\pm}$ to $c_{ss}^{\pm}$ \cite{Forman2011a,Rahn2012}: 
+\begin{equation}
+	\frac{C_{ss}^{\pm}(s)}{J_{n}^{\pm}(s)} = \frac{-\frac{(R_{s}^{\pm})^3}{165 (D_{s}^{\pm})^2}s^{2} -\frac{4 R_{s}^{\pm}}{11 D_{s}^{\pm}}s -\frac{3}{R_{s}^{\pm} }  }{ \frac{(R_s^{\pm})^4}{3465}s^3 + \frac{3 (R_s^{\pm})^2}{55 D_s^{\pm}}s^2 + s },
+\end{equation}
+which we notate more simply by
+\begin{equation}
+	\frac{C_{ss}^{\pm}(s)}{J_{n}^{\pm}(s)} = \frac{b_2 s^{2} + b_1 s + b_0 }{ a_3 s^3 + a_2 s^2 + a_1 s + a_0 }.
+\end{equation}
+Next we multiply top and bottom by $\frac{1}{a_3}$ to yield a unity coefficient on the highest-order term in the denominator, yielding
+\begin{equation}\label{eqn:cs-tf}
+	\frac{C_{ss}^{\pm}(s)}{J_{n}^{\pm}(s)} = \frac{\bar{b}_2 s^{2} + \bar{b}_1 s + \bar{b}_0 }{ s^3 + \bar{a}_2 s^2 + \bar{a}_1 s + \bar{a}_0 },
+\end{equation}
+where $\bar{b}_i = b_i/a_3$ and $\bar{a}_i = a_i/a_3$.
+
+%\begin{eqnarray}
+%	\frac{C_{ss}^{\pm}(s)}{J_{n}^{\pm}(s)} &=& \frac{-\frac{21}{R_{s}^{\pm}}s^{2} -\frac{1260 D_{s}^{\pm}}{(R_{s}^{\pm})^{3}}s -\frac{10395 (D_{s}^{\pm})^{2}}{ (R_{s}^{\pm})^{4} }  }{s^{3} + \frac{189 D_{s}^{\pm}}{(R_{s}^{\pm})^{2}} s^{2} + \frac{3465 (D_{s}^{\pm})^{2}}{(R_{s}^{\pm})^{4}} s }, \\
+%	\frac{\overline{C}_{s}^{\pm}(s)}{J_{n}^{\pm}(s)} &=& \frac{-3 R_{s}^{\pm}}{s}.
+%\end{eqnarray}
+The transfer function (\ref{eqn:cs-tf}) is converted into controllable canonical state-space form, thus producing the subsystem:
 \begin{eqnarray}
 \frac{d}{dt}
 \left[
@@ -185,7 +199,7 @@ These transfer functions are converted into controllable canonical state-space f
 \begin{array}{ccc}
  0 & 1  & 0  \\
  0 & 0  & 1  \\
- 0 & -\frac{3465 (D_{s}^{\pm})^{2}}{(R_{s}^{\pm})^{4}}  & -\frac{189 D_{s}^{\pm}}{(R_{s}^{\pm})^{2}}  
+ -\bar{a}_0 & -\bar{a}_1  & -\bar{a}_2  
 \end{array}
 \right]
 \left[
@@ -200,18 +214,16 @@ These transfer functions are converted into controllable canonical state-space f
  0 \\
  0 \\
  1
-\end{array}
+\end{array} \label{eqn:cs-ss-cc1}
 \right] j_{n}^{\pm}(t) \\
 \left[
 \begin{array}{c}
  c_{ss}^{\pm}(t) \\
- \overline{c}_{s}^{\pm}(t)
 \end{array}
 \right] &=& 
 \left[
 \begin{array}{ccc}
- -\frac{10395 (D_{s}^{\pm})^{2}}{(R_{s}^{\pm})^{5}} & -\frac{1260 D_{s}^{\pm}}{(R_{s}^{\pm})^{3}}  & -\frac{21}{R_{s}^{\pm}}  \\
- -\frac{3}{R_{s}^{\pm}} \cdot \frac{3465 (D_{s}^{\pm})^{2}}{(R_{s}^{\pm})^{4}} & -\frac{3}{R_{s}^{\pm}} \cdot \frac{189 D_{s}^{\pm}}{(R_{s}^{\pm})^{2}} & -\frac{3}{R_{s}^{\pm}} \cdot 1
+ \bar{b}_0 & \bar{b}_1  & \bar{b}_2
 \end{array}
 \right]
 \left[
@@ -220,159 +232,279 @@ These transfer functions are converted into controllable canonical state-space f
  c_{s2}^{\pm}(t) \\
  c_{s3}^{\pm}(t)
 \end{array}
-\right]
+\right] \label{eqn:cs-ss-cc2}
 \end{eqnarray}
 for each discrete point in $x$.
 
+To simplify analytical applications for the DFN model, we seek a different state-space realization in which bulk concentration $\bar{c}_s^{\pm}(t)$ is expressed as a state. This can be found by pursuing a Jordan-form state-space realization, which diagonalizes the system matrix. The diagonal elements represent the system eigenvalues. The zero eigenvalue corresponds to bulk concentration. All the aforementioned calculations are performed in Matlab function \texttt{c\_s\_mats.m}. The final result produces system matrices:
+\begin{eqnarray}
+\frac{d}{dt}
+\left[
+\begin{array}{c}
+ c_{s1}^{\pm}(t) \\
+ c_{s2}^{\pm}(t) \\
+ c_{s3}^{\pm}(t)
+\end{array}
+\right]
+&=&
+A_{cs}^{\pm}
+\left[
+\begin{array}{c}
+ c_{s1}^{\pm}(t) \\
+ c_{s2}^{\pm}(t) \\
+ c_{s3}^{\pm}(t)
+\end{array}
+\right] + 
+B_{cs}^{\pm} \ j_{n}^{\pm}(t) \label{eqn:cs-ss-jordan1} \\
+\left[
+\begin{array}{c}
+ c_{ss}^{\pm}(t) \\
+ \bar{c}_s^{\pm}(t)
+\end{array}
+\right] &=& 
+C_{cs}^{\pm}
+\left[
+\begin{array}{c}
+ c_{s1}^{\pm}(t) \\
+ c_{s2}^{\pm}(t) \\
+ c_{s3}^{\pm}(t)
+\end{array}
+\right] \label{eqn:cs-ss-jordan2}
+\end{eqnarray}
+where the second row of $C_{cs}^{\pm}$ is $[C_{cs}^{\pm}]_2 = [0, 0, 1]$. Note we have abused notation. The states in (\ref{eqn:cs-ss-jordan1})-(\ref{eqn:cs-ss-jordan2}) are not the same as those in (\ref{eqn:cs-ss-cc1})-(\ref{eqn:cs-ss-cc2}), due to the different realizations. Also, these matrices must be computed online, due to the temperature dependence of $D_s^{\pm}$ described in (\ref{eqn:arrhenius}).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Electrolyte Concentration, $c_{e}$}\label{sec:ce}
-\red{[NEEDS REVISION, FOR CONCENTRATION DEPENDENT DIFFUSIVITY AND BCS]} The electrolyte concentration PDE (\ref{eqn:ce}) and BCs (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented using the central difference method, which ultimately produces the matrix differential equation:
+\green{[DONE]} The electrolyte concentration PDE (\ref{eqn:ce}) combined with (\ref{eqn:ie}), and BCs (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented using the central difference method, which ultimately produces the matrix differential equation:
 \begin{equation}
-	\frac{d}{dt} c_{e}(t) = A_{ce}(c_{e,x}) \cdot c_{e}(t) + B_{ce}(c_{e,x}) \cdot i_{e,x}(t)
+	\frac{d}{dt} c_{e}^j(t) = \frac{d D_e^{\eff,j}}{d c_e}(c_e^j) \left[ M^{j,1}_{ce} c_{e}^j(t) + M^{j,2}_{ce} c_{e,bc}^j(t) \right]^2 + D_e^{\eff,j}(c_e^j) \left[ M^{j,3}_{ce} c_{e}^j(t) + M^{j,4}_{ce} c_{e,bc}^j(t) \right] + M^{j,5}_{ce} j_{n}^j(t)
 \end{equation}
-where $c_{e}, i_{e,x}$ are vectors whose elements represent discrete points along the $x$-dimension of the DFN model. In particular $i_{e,x}$ and $c_{e,x}$ represent the entire electrolyte current and concentration, respectively, across the entire battery, including boundary values,
-\begin{eqnarray}
-	i_{e,x}(t) &=& \left[0, \ i_{e}^{-}(x,t), \ I(x,t), \ i_{e}^{+}(x,t), \ 0 \right]^{T}, \label{eqn:iex} \\
-	c_{e,x}(t) &=& \left[c_{e,bc,1}(t), \ c_{e}^{-}(x,t), c_{e,bc,2}(t), \ c_{e}^{sep}(x,t), c_{e,bc,3}(t), \ c_{e}^{+}(x,t), \ c_{e,bc,4}(t) \right]^{T}, \label{eqn:cex} \\ 
-	c_{e,bc}(t) &=& C_{ce} \ c_{e}(t) 
-\end{eqnarray}
-Note that the system matrices $(A_{ce}, B_{ce})$ are also state-varying, but $C_{ce}$ is not. These state matrices are computed online by Matlab function \texttt{c\_e\_mats.m}. Matrix $C_{ce}$ can be computed offline. The state matrices are computed by
-\begin{eqnarray}
-	A_{ce} &=& (M1) - (M2) (N2)^{-1} (N1), \\ 
-	B_{ce} &=& (M3), \\
-	C_{ce} &=& - (N2)^{-1} (N1)
-\end{eqnarray}
-The first term on the RHS of PDE (\ref{eqn:ce}) is implemented by
-\begin{eqnarray}
-	(M1) &=& \textrm{BlkDiag}\left( (M1n), (M1s), (M1p) \right), \\
-	(M2) &=&
+where $c_{e}, j_{n}^j$ are vectors whose elements represent discrete points along the $x$-dimension of the DFN model. The variable $c_{e,bc}^j$ represents the boundary values for region $j$, namely $c_{e,bc}^- = \left[c_{e,bc,1}, c_{e,bc,2} \right]^T$, $c_{e,bc}^{\sep} = \left[c_{e,bc,2}, c_{e,bc,3} \right]^T$, $c_{e,bc}^{+} = \left[c_{e,bc,3}, c_{e,bc,4} \right]^T$. The boundary values are computed by: $c_{e,bc}(t) = C_{ce} \ c_{e}(t)$ where $c_{e,bc} = \left[c_{e,bc,1}, c_{e,bc,2}, c_{e,bc,3}, c_{e,bc,4} \right]^T$.
+
+%Note that $i_{e,x}$ and $c_{e,x}$ represent the entire electrolyte current and concentration, respectively, across the entire battery, including boundary values,
+%\begin{eqnarray}
+%	i_{e,x}(t) &=& \left[0, \ i_{e}^{-}(x,t), \ I(x,t), \ i_{e}^{+}(x,t), \ 0 \right]^{T}, \label{eqn:iex} \\
+%	c_{e,x}(t) &=& \left[c_{e,bc,1}(t), \ c_{e}^{-}(x,t), c_{e,bc,2}(t), \ c_{e}^{sep}(x,t), c_{e,bc,3}(t), \ c_{e}^{+}(x,t), \ c_{e,bc,4}(t) \right]^{T}, \label{eqn:cex} \\ 
+%	c_{e,bc}(t) &=& C_{ce} \ c_{e}(t) 
+%\end{eqnarray}
+Note that the effective diffusivity, $D_e^{\eff,j}(c_e^j)$, and its derivative, $\frac{d D_e^{\eff,j}}{d c_e}(c_e^j)$, are state-dependent and must be computed online. The matrices $M^{j,1}_{ce}, M^{j,2}_{ce}, M^{j,3}_{ce}, M^{j,4}_{ce}, M^{j,5}_{ce}, C_{ce}$ are computed offline by Matlab function \texttt{c\_e\_mats.m}. These matrices are given by
+\begin{align}
+M^{j,1}_{ce} &=
+\frac{1}{2 L^j \Delta x^j} \left[
+\begin{array}{ccccc}
+ 0 & 1 & 0 & \ldots & 0  \\
+ -1 & 0 & 1 & \ldots & 0  \\
+ 0 & -1 & 0 & \ldots & 0  \\
+ \vdots & \vdots & \vdots &  &  \\
+ 0 & 0 & \cdots & \cdots & 1 \\
+ 0 & 0 & \cdots & -1 & 0 \\
+\end{array}
+\right], \quad
+M^{j,2}_{ce} =
+\frac{1}{2 L^j \Delta x^j} \left[
+\begin{array}{cc}
+ -1 & 0  \\
+ 0 & 0 \\
+ \vdots & \vdots  \\
+ 0 & 0 \\
+ 0 & 1 \\
+\end{array}
+\right], \qquad \\
+M^{j,3}_{ce} &= \frac{1}{(L^j \Delta x^j)^2}
 \left[
-\begin{array}{cccc}
- (M2n_{col1}) & (M2n_{col2}) & 0 & 0 \\
- 0 & (M2s_{col1}) & (M2s_{col2}) & 0 \\
- 0 & 0 & (M2p_{col1}) & (M2p_{col2}) \\
+\begin{array}{cccccc}
+ 1 & -2 & 1 & \ldots & & 0  \\
+ 0 & 1 & -2 & \ldots & & 0  \\
+ \vdots & \vdots & \vdots & & & \vdots \\
+ 0 & 0 & \cdots & 1 & -2 & 1 \\
+ 0 & 0 & \cdots & 0 & 1 & -2 \\
 \end{array}
-\right]
-\end{eqnarray}
-and
-\begin{align}
-&(M1n) =  \nonumber \\
-&\alpha^{-} \cdot \left[
-\begin{array}{cccc}
-  -(D_{e,0} + D_{e,n,2}) & D_{e,n,2}  &  & \\
-  D_{e,n,1} & -(D_{e,n,1}+D_{e,n,3})  & D_{e,n,3} & \\
-  \ddots & \ddots  & \ddots & \\
-  & D_{e,n,i-1} & -(D_{e,n,i-1} + D_{e,n,i+1}) & D_{e,n,i+1} \\
-  & \ddots & \ddots  & \ddots \\
-%  &   & D_{e,n,Nxn-1} & -(D_{e,n,Nxn-3} + D_{e,n,Nxn-1}) & D_{e,n,Nxn-1} \\
-  &  & D_{e,n,Nxn-2} & -(D_{e,n,Nxn-2} + D_{e,ns})
+\right], \quad
+M^{j,4}_{ce} =
+\frac{1}{(L^j \Delta x^j)^2} \left[
+\begin{array}{cc}
+ 1 & 0  \\
+ 0 & 0 \\
+ \vdots & \vdots  \\
+ 0 & 0 \\
+ 0 & 1 \\
 \end{array}
-\right]
+\right], \qquad \\
+M^{j,5}_{ce} &= \frac{(1-t_c^0)a_s^j}{\varepsilon_e^j}
+\mathbb{I}.
 \end{align}
-\begin{align}
-&(M1s) =  \nonumber \\
-&\alpha^{sep} \cdot \left[
-\begin{array}{cccc}
-  -(D_{e,ns} + D_{e,s,2}) & D_{e,s,2}  &  & \\
-  D_{e,s,1} & -(D_{e,s,1}+D_{e,s,3})  & D_{e,s,3} & \\
-  \ddots & \ddots  & \ddots & \\
-  & D_{e,s,i-1} & -(D_{e,s,i-1} + D_{e,s,i+1}) & D_{e,s,i+1} \\
-  & \ddots & \ddots  & \ddots \\
-%  &   & D_{e,n,Nxn-1} & -(D_{e,n,Nxn-3} + D_{e,n,Nxn-1}) & D_{e,n,Nxn-1} \\
-  &  & D_{e,s,Nxs-2} & -(D_{e,s,Nxs-2} + D_{e,np})
-\end{array}
-\right]
-\end{align}
-\begin{align}
-&(M1p) =  \nonumber \\
-&\alpha^{+} \cdot \left[
-\begin{array}{cccc}
-  -(D_{e,sp} + D_{e,p,2}) & D_{e,p,2}  &  & \\
-  D_{e,p,1} & -(D_{e,p,1}+D_{e,p,3})  & D_{e,p,3} & \\
-  \ddots & \ddots  & \ddots & \\
-  & D_{e,p,i-1} & -(D_{e,p,i-1} + D_{e,p,i+1}) & D_{e,p,i+1} \\
-  & \ddots & \ddots  & \ddots \\
-%  &   & D_{e,n,Nxn-1} & -(D_{e,n,Nxn-3} + D_{e,n,Nxn-1}) & D_{e,n,Nxn-1} \\
-  &  & D_{e,p,Nxp-2} & -(D_{e,p,Nxp-2} + D_{e,N})
-\end{array}
-\right]
-\end{align}
+for $j \in \{-,\sep,+\}$. The matrix $C_{ce}$ is given by
 \begin{equation}
-(M2n) = 
-\alpha^{-} \left[
-\begin{array}{cc}
-  D_{e,0} & 0 \\
-  0 & 0 \\
-  \vdots & \vdots \\
-  0 & D_{e,ns} \\
-\end{array}
-\right], \
-(M2s) = 
-\alpha^{sep} \left[
-\begin{array}{cc}
-  D_{e,ns} & 0 \\
-  0 & 0 \\
-  \vdots & \vdots \\
-  0 & D_{e,sp} \\
-\end{array}
-\right], \
-(M2p) = 
-\alpha^{+} \left[
-\begin{array}{cc}
-  D_{e,sp} & 0 \\
-  0 & 0 \\
-  \vdots & \vdots \\
-  0 & D_{e,N} \\
-\end{array}
-\right]
+	C_{ce} = -(N^2_{ce})^{-1}(N^1_{ce})
 \end{equation}
-\begin{equation}
-(M3) = 
-\left[
-\begin{array}{cccc |c| ccc |c| cccc}
-  -\beta^{-} & 0 & \beta^{-} &  &  &  &  &  &  &  &  &  &  \\
-   & \ddots & \ddots & \ddots &  &  &  &  &  &  &  &  &  \\
-   &  & -\beta^{-} & 0 & \beta^{-} &  &  &  &  &  &  &  &  \\
-   \hline
-   &  &  &  & -\beta^{sep} &  0 &  \beta^{sep}  &  &  &  &  &  &  \\
-   &  &  &  &  & \ddots & \ddots & \ddots &  &  &  &  &  \\
-   &  &  &  &  &  & -\beta^{sep} & 0 & \beta^{sep} &  &  &  &  \\
-   \hline
-   &  &  &  &  & &  &   & -\beta^{+} & 0 & \beta^{+} &  &  \\
-   &  &  &  &  & &  &   &  & \ddots & \ddots & \ddots &  \\
-   &  &  &  &  & &  &   &  &  & -\beta^{+} & 0 & \beta^{+} \\
-\end{array}
-\right]
-\end{equation}
-
-and
+where
 \begin{eqnarray}
-	\alpha^{j} &=& \frac{1}{\left(L^{j} \Delta x^{j} \right)^{2}}, \qquad \beta^{j} = \frac{1 - t_{c}^{0}}{2 \varepsilon_{e}^{j} F L^{j} \Delta x^{j}}, \\
-	D_{e}(c_{e,x}(x,t)) &=& \left[ D_{e,0} \mid D_{e,n}(x) \mid D_{e,ns} \mid D_{e,s}(x) \mid D_{e,sp} \mid D_{e,p}(x) \mid D_{e,N} \right]
+	N^1_{ce} &=& 
+        \left[
+        \begin{array}{ccccc|ccc}
+         4 & -1 & \cdots & 0 & 0 & 0 & 0 & \cdots \\
+         0 & 0 & \cdots & \frac{(\varepsilon_e^-)^{\brug}}{2L^- \Delta x^-} & -4 \frac{(\varepsilon_e^-)^{\brug}}{2L^- \Delta x^-} & -4 \frac{(\varepsilon_e^{\sep})^{\brug}}{2L^{\sep} \Delta x^{\sep}} &  \frac{(\varepsilon_e^{\sep})^{\brug}}{2L^{\sep} \Delta x^{\sep}} & \cdots \\
+         4 & 0 & \cdots & 0 & 0 & 0 & 0 & \cdots \\
+         0 & 0 & \cdots & 0 & 0 & 0 & 0 & \cdots 
+        \end{array}
+        \right. \nonumber \\
+        && \left.
+        \begin{array}{ccc|ccccc}
+        \cdots & 0 & 0 & 0 & 0 & \cdots & 0 & 0 \\
+        \cdots & 0 & 0 & 0 & 0 & \cdots & 0 & 0 \\
+        \cdots & \frac{(\varepsilon_e^{\sep})^{\brug}}{2L^{\sep} \Delta x^{\sep}} & -4 \frac{(\varepsilon_e^{\sep})^{\brug}}{2L^{\sep} \Delta x^{\sep}} & -4 \frac{(\varepsilon_e^{+})^{\brug}}{2L^{+} \Delta x^{+}} & \frac{(\varepsilon_e^{+})^{\brug}}{2L^{+} \Delta x^{+}} & \cdots & 0 & 0 \\
+        \cdots & 0 & 0 & 0 & 0 & \cdots & 1 & -4
+        \end{array}
+        \right] \\
+	N^2_{ce} &=& 
+        \left[
+        \begin{array}{cccc}
+        -3  &  0 & 0 & 0 \\
+         0  &  3\frac{(\varepsilon_e^-)^{\brug}}{2L^- \Delta x^-} + 3 \frac{(\varepsilon_e^{\sep})^{\brug}}{2L^{\sep} \Delta x^{\sep}} & 0 & 0 \\
+         0 & 0  & 3 \frac{(\varepsilon_e^{\sep})^{\brug}}{2L^{\sep} \Delta x^{\sep}} + 3\frac{(\varepsilon_e^+)^{\brug}}{2L^+ \Delta x^+}& 0 \\
+        0 & 0  & 0 & 3 
+        \end{array}
+        \right].
 \end{eqnarray}
+Note, we have used second-order accurate finite difference approximations for the boundary conditions.
 
-
-The boundary conditions (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented as
-\begin{align}
-(N1) &=
-\left[
-\begin{array}{cccc | cccc | cccc}
-  \frac{1}{L^{-} \Delta x^{-}} & 0 & \cdots & 0 & 0 & \cdots & & 0 & 0 & \cdots & & 0\\
-  0 & \cdots & 0 & \frac{D_{e,ns}}{L^{-}\Delta x^{-}} & \frac{D_{e,ns}}{L^{sep}\Delta x^{sep}} & 0 & \cdots & 0 & 0 & \cdots & & 0\\
-  0 & 0 & \cdots & 0 & 0 & \cdots & 0 & \frac{D_{e,sp}}{L^{sep}\Delta x^{sep}} & \frac{D_{e,sp}}{L^{+}\Delta x^{+}} & 0 & \cdots & 0\\
-  0 & 0 & \cdots & 0 & 0 & \cdots & & 0 & 0 & \cdots & 0 & \frac{-1}{L^{+} \Delta x^{+}}
-\end{array}
-\right], \\
-(N2) &= 
-\left[
-\begin{array}{cccc}
-  \frac{-1}{L^{-} \Delta x^{-}} & 0  & 0 & 0 \\
-  0 & -\frac{D_{e,ns}}{L^{-} \Delta x^{-}} - \frac{D_{e,ns}}{L^{sep} \Delta x^{sep}}  & 0  & 0 \\
-  0 & 0  & -\frac{D_{e,sp}}{L^{sep} \Delta x^{sep}} - \frac{D_{e,sp}}{L^{+} \Delta x^{+}} & 0 \\
-  0 & 0  & 0  & \frac{1}{L^{+} \Delta x^{+}}
-\end{array}
-\right]
-\end{align}
+%\clearpage
+%\begin{eqnarray}
+%	A_{ce} &=& (M1) - (M2) (N2)^{-1} (N1), \\ 
+%	B_{ce} &=& (M3), \\
+%	C_{ce} &=& - (N2)^{-1} (N1)
+%\end{eqnarray}
+%The first term on the RHS of PDE (\ref{eqn:ce}) is implemented by
+%\begin{eqnarray}
+%	(M1) &=& \textrm{BlkDiag}\left( (M1n), (M1s), (M1p) \right), \\
+%	(M2) &=&
+%\left[
+%\begin{array}{cccc}
+% (M2n_{col1}) & (M2n_{col2}) & 0 & 0 \\
+% 0 & (M2s_{col1}) & (M2s_{col2}) & 0 \\
+% 0 & 0 & (M2p_{col1}) & (M2p_{col2}) \\
+%\end{array}
+%\right]
+%\end{eqnarray}
+%and
+%\begin{align}
+%&(M1n) =  \nonumber \\
+%&\alpha^{-} \cdot \left[
+%\begin{array}{cccc}
+%  -(D_{e,0} + D_{e,n,2}) & D_{e,n,2}  &  & \\
+%  D_{e,n,1} & -(D_{e,n,1}+D_{e,n,3})  & D_{e,n,3} & \\
+%  \ddots & \ddots  & \ddots & \\
+%  & D_{e,n,i-1} & -(D_{e,n,i-1} + D_{e,n,i+1}) & D_{e,n,i+1} \\
+%  & \ddots & \ddots  & \ddots \\
+%%  &   & D_{e,n,Nxn-1} & -(D_{e,n,Nxn-3} + D_{e,n,Nxn-1}) & D_{e,n,Nxn-1} \\
+%  &  & D_{e,n,Nxn-2} & -(D_{e,n,Nxn-2} + D_{e,ns})
+%\end{array}
+%\right]
+%\end{align}
+%\begin{align}
+%&(M1s) =  \nonumber \\
+%&\alpha^{sep} \cdot \left[
+%\begin{array}{cccc}
+%  -(D_{e,ns} + D_{e,s,2}) & D_{e,s,2}  &  & \\
+%  D_{e,s,1} & -(D_{e,s,1}+D_{e,s,3})  & D_{e,s,3} & \\
+%  \ddots & \ddots  & \ddots & \\
+%  & D_{e,s,i-1} & -(D_{e,s,i-1} + D_{e,s,i+1}) & D_{e,s,i+1} \\
+%  & \ddots & \ddots  & \ddots \\
+%%  &   & D_{e,n,Nxn-1} & -(D_{e,n,Nxn-3} + D_{e,n,Nxn-1}) & D_{e,n,Nxn-1} \\
+%  &  & D_{e,s,Nxs-2} & -(D_{e,s,Nxs-2} + D_{e,np})
+%\end{array}
+%\right]
+%\end{align}
+%\begin{align}
+%&(M1p) =  \nonumber \\
+%&\alpha^{+} \cdot \left[
+%\begin{array}{cccc}
+%  -(D_{e,sp} + D_{e,p,2}) & D_{e,p,2}  &  & \\
+%  D_{e,p,1} & -(D_{e,p,1}+D_{e,p,3})  & D_{e,p,3} & \\
+%  \ddots & \ddots  & \ddots & \\
+%  & D_{e,p,i-1} & -(D_{e,p,i-1} + D_{e,p,i+1}) & D_{e,p,i+1} \\
+%  & \ddots & \ddots  & \ddots \\
+%%  &   & D_{e,n,Nxn-1} & -(D_{e,n,Nxn-3} + D_{e,n,Nxn-1}) & D_{e,n,Nxn-1} \\
+%  &  & D_{e,p,Nxp-2} & -(D_{e,p,Nxp-2} + D_{e,N})
+%\end{array}
+%\right]
+%\end{align}
+%\begin{equation}
+%(M2n) = 
+%\alpha^{-} \left[
+%\begin{array}{cc}
+%  D_{e,0} & 0 \\
+%  0 & 0 \\
+%  \vdots & \vdots \\
+%  0 & D_{e,ns} \\
+%\end{array}
+%\right], \
+%(M2s) = 
+%\alpha^{sep} \left[
+%\begin{array}{cc}
+%  D_{e,ns} & 0 \\
+%  0 & 0 \\
+%  \vdots & \vdots \\
+%  0 & D_{e,sp} \\
+%\end{array}
+%\right], \
+%(M2p) = 
+%\alpha^{+} \left[
+%\begin{array}{cc}
+%  D_{e,sp} & 0 \\
+%  0 & 0 \\
+%  \vdots & \vdots \\
+%  0 & D_{e,N} \\
+%\end{array}
+%\right]
+%\end{equation}
+%\begin{equation}
+%(M3) = 
+%\left[
+%\begin{array}{cccc |c| ccc |c| cccc}
+%  -\beta^{-} & 0 & \beta^{-} &  &  &  &  &  &  &  &  &  &  \\
+%   & \ddots & \ddots & \ddots &  &  &  &  &  &  &  &  &  \\
+%   &  & -\beta^{-} & 0 & \beta^{-} &  &  &  &  &  &  &  &  \\
+%   \hline
+%   &  &  &  & -\beta^{sep} &  0 &  \beta^{sep}  &  &  &  &  &  &  \\
+%   &  &  &  &  & \ddots & \ddots & \ddots &  &  &  &  &  \\
+%   &  &  &  &  &  & -\beta^{sep} & 0 & \beta^{sep} &  &  &  &  \\
+%   \hline
+%   &  &  &  &  & &  &   & -\beta^{+} & 0 & \beta^{+} &  &  \\
+%   &  &  &  &  & &  &   &  & \ddots & \ddots & \ddots &  \\
+%   &  &  &  &  & &  &   &  &  & -\beta^{+} & 0 & \beta^{+} \\
+%\end{array}
+%\right]
+%\end{equation}
+%
+%and
+%\begin{eqnarray}
+%	\alpha^{j} &=& \frac{1}{\left(L^{j} \Delta x^{j} \right)^{2}}, \qquad \beta^{j} = \frac{1 - t_{c}^{0}}{2 \varepsilon_{e}^{j} F L^{j} \Delta x^{j}}, \\
+%	D_{e}(c_{e,x}(x,t)) &=& \left[ D_{e,0} \mid D_{e,n}(x) \mid D_{e,ns} \mid D_{e,s}(x) \mid D_{e,sp} \mid D_{e,p}(x) \mid D_{e,N} \right]
+%\end{eqnarray}
+%
+%
+%The boundary conditions (\ref{eqn:ce-bc1})-(\ref{eqn:ce-bc5}) are implemented as
+%\begin{align}
+%(N1) &=
+%\left[
+%\begin{array}{cccc | cccc | cccc}
+%  \frac{1}{L^{-} \Delta x^{-}} & 0 & \cdots & 0 & 0 & \cdots & & 0 & 0 & \cdots & & 0\\
+%  0 & \cdots & 0 & \frac{D_{e,ns}}{L^{-}\Delta x^{-}} & \frac{D_{e,ns}}{L^{sep}\Delta x^{sep}} & 0 & \cdots & 0 & 0 & \cdots & & 0\\
+%  0 & 0 & \cdots & 0 & 0 & \cdots & 0 & \frac{D_{e,sp}}{L^{sep}\Delta x^{sep}} & \frac{D_{e,sp}}{L^{+}\Delta x^{+}} & 0 & \cdots & 0\\
+%  0 & 0 & \cdots & 0 & 0 & \cdots & & 0 & 0 & \cdots & 0 & \frac{-1}{L^{+} \Delta x^{+}}
+%\end{array}
+%\right], \\
+%(N2) &= 
+%\left[
+%\begin{array}{cccc}
+%  \frac{-1}{L^{-} \Delta x^{-}} & 0  & 0 & 0 \\
+%  0 & -\frac{D_{e,ns}}{L^{-} \Delta x^{-}} - \frac{D_{e,ns}}{L^{sep} \Delta x^{sep}}  & 0  & 0 \\
+%  0 & 0  & -\frac{D_{e,sp}}{L^{sep} \Delta x^{sep}} - \frac{D_{e,sp}}{L^{+} \Delta x^{+}} & 0 \\
+%  0 & 0  & 0  & \frac{1}{L^{+} \Delta x^{+}}
+%\end{array}
+%\right]
+%\end{align}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%

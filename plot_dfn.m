@@ -31,7 +31,7 @@ set(gca,'FontSize', fs)
 xlim([t(1), t(end)])
 
 subplot(4,1,4)
-plot(t,T-273,'LineWidth',2)
+plot(t,T-273.15,'LineWidth',2)
 ylabel('Temperature [deg C]','FontSize', fs)
 xlabel('Time [sec]','FontSize', fs)
 legend({'$$T(t)$$'},'interpreter','latex')

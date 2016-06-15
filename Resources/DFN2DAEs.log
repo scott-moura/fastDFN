@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  14 JUN 2016 21:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  15 JUN 2016 18:12
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -230,18 +230,18 @@ LaTeX Warning: Label `eqn:i0' multiply defined.
 )
 \openout1 = `DFN2DAEs.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -291,11 +291,11 @@ LaTeX Font Info:    ... okay on input line 28.
 \makeMPintoPDFobject=\count108
 \everyMPtoPDFconversion=\toks24
 )
-LaTeX Font Info:    Try loading font information for U+msa on input line 29.
+LaTeX Font Info:    Try loading font information for U+msa on input line 30.
  (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 29.
+LaTeX Font Info:    Try loading font information for U+msb on input line 30.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -305,61 +305,54 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 <dfn-schematic.pdf, id=18, 505.89pt x 361.35pt>
 File: dfn-schematic.pdf Graphic file (type pdf)
  <use dfn-schematic.pdf>
-Package pdftex.def Info: dfn-schematic.pdf used on input line 61.
+Package pdftex.def Info: dfn-schematic.pdf used on input line 62.
 (pdftex.def)             Requested size: 325.215pt x 244.54694pt.
 
 [2 <./dfn-schematic.pdf>] [3]
-Overfull \hbox (28.9652pt too wide) in paragraph at lines 141--141
+Overfull \hbox (28.9652pt too wide) in paragraph at lines 142--142
 [] 
  []
 
 [4] [5]
-Overfull \hbox (0.94229pt too wide) in paragraph at lines 271--271
-[] 
+Overfull \hbox (5.16849pt too wide) detected at line 281
+[]\OML/cmm/m/it/12 c[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 t\OT1/cmr/m/n/12 ) = []
+(\OML/cmm/m/it/12 c[]\OT1/cmr/m/n/12 ) [][] + \OML/cmm/m/it/12 D[]\OT1/cmr/m/n/
+12 (\OML/cmm/m/it/12 c[]\OT1/cmr/m/n/12 ) [] + \OML/cmm/m/it/12 M[]j[]\OT1/cmr/
+m/n/12 (\OML/cmm/m/it/12 t\OT1/cmr/m/n/12 )
  []
 
-
-Overfull \hbox (3.08167pt too wide) in paragraph at lines 285--285
-[] 
- []
-
-
-Overfull \hbox (8.08833pt too wide) detected at line 328
-\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 M\OT1/cmr/m/n/12 2\OML/cmm/m/it/12 n\OT1/cmr/
-m/n/12 ) = \OML/cmm/m/it/12 [] [] ;  \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 M\OT1/c
-mr/m/n/12 2\OML/cmm/m/it/12 s\OT1/cmr/m/n/12 ) = \OML/cmm/m/it/12 [] [] ;  \OT
-1/cmr/m/n/12 (\OML/cmm/m/it/12 M\OT1/cmr/m/n/12 2\OML/cmm/m/it/12 p\OT1/cmr/m/n
-/12 ) = \OML/cmm/m/it/12 [] []
- []
-
-[6]
-Overfull \hbox (13.2216pt too wide) in paragraph at lines 375--375
-[] 
- []
-
-[7] [8] [9]
-Overfull \hbox (5.57072pt too wide) in paragraph at lines 566--567
+[6] [7] [8]
+Overfull \hbox (5.57072pt too wide) in paragraph at lines 698--699
 \OT1/cmr/m/n/12 [INCOMPLETE][] The elec-trolyte po-ten-tial is im-ple-mented us
 -ing the cen-tral dif-fer-ence method,
  []
 
-[10]
+
+LaTeX Warning: Reference `eqn:iex' on page 9 undefined on input line 702.
+
+
+LaTeX Warning: Reference `eqn:cex' on page 9 undefined on input line 702.
+
+[9]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-(./DFN2DAEs.bbl) [11] [12] (./DFN2DAEs.aux)
+(./DFN2DAEs.bbl [10]) [11] [12] (./DFN2DAEs.aux)
+
+LaTeX Warning: There were undefined references.
+
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3111 strings out of 493014
- 42173 string characters out of 6133351
- 128667 words of memory out of 5000000
- 6595 multiletter control sequences out of 15000+600000
+ 3119 strings out of 493014
+ 42279 string characters out of 6133351
+ 127708 words of memory out of 5000000
+ 6603 multiletter control sequences out of 15000+600000
  13858 words of font info for 54 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 42i,17n,26p,521b,279s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 42i,17n,26p,559b,279s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
 ></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb><
@@ -376,7 +369,7 @@ e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/
 16/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/201
 6/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/2016
 /texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on DFN2DAEs.pdf (12 pages, 699738 bytes).
+Output written on DFN2DAEs.pdf (12 pages, 703718 bytes).
 PDF statistics:
  486 PDF objects out of 1000 (max. 8388607)
  343 compressed objects within 4 object streams

@@ -344,7 +344,7 @@ for k = 1:(NT-1)
     eta_s_n = phi_s_n - phi_e(1:Nn,:);
     eta_s_p = phi_s_p - phi_e(end-Np+1:end, :);
     
-    fprintf(1,'Time : %3.2f sec | C-rate : %2.2f | Temp : %2.1f | SOC : %1.3f | Voltage : %2.3fV | Newton Iters : %2.0f\n',...
+    fprintf(1,'Time : %3.2f sec | C-rate : %2.2f | Temp : %2.1fdegC | SOC : %1.3f | Voltage : %2.3fV | Newton Iters : %2.0f\n',...
         t(k),I(k+1)/OneC,T(k+1)-273.15,SOC(k+1),Volt(k+1),stats.iters);
     
     if(Volt(k+1) < p.volt_min)

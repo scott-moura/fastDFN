@@ -303,6 +303,9 @@ df6pep = -2/p.Faraday*i_0p.*cosh(aFRT*eta_p) * aFRT;
 df6Jn = -2/p.Faraday*i_0n.*cosh(aFRT*eta_n) * aFRT*p.R_f_n*p.Faraday - 1;
 df6Jp = -2/p.Faraday*i_0p.*cosh(aFRT*eta_p) * aFRT*p.R_f_p*p.Faraday - 1;
 
+df6Tn = 2/p.Faraday * i_0n .* cosh(aFRT * eta_n) * (p.alph*p.Faraday)/(p.R) .* eta_n * (-1/T^2);
+df6Tp = 2/p.Faraday * i_0p .* cosh(aFRT * eta_p) * (p.alph*p.Faraday)/(p.R) .* eta_p * (-1/T^2);
+
 % Input into Jacobian
 
 % Loop through each "comb tooth" in anode
@@ -333,6 +336,11 @@ g_x(ind_jp,ind_csp) = df6dcssp_diag * g_x(ind_jp,ind_csp);
 
 g_x(ind_jn,ind_ce(1:Nn)) = diag(df6dcen);
 g_x(ind_jp,ind_ce(end-Np+1:end)) = diag(df6dcep);
+
+g_x(ind_jn,end) = df6Tn;
+g_x(ind_jp,end) = df6Tp;
+
+
 
 g_z(ind_jn,ind_phi_s_n) = diag(df6psn);
 g_z(ind_jp,ind_phi_s_p) = diag(df6psp);

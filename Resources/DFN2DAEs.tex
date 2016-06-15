@@ -113,7 +113,9 @@ Ultimately, the equations are discretized to produce a DAE in the following form
 	\xdot &=& f(x, z, u), \label{eqn:dae1} \\
 	0 &=& g(x,z,u) \label{eqn:dae2}
 \end{eqnarray}
-with initial conditions $x(0), z(0)$ that are consistent. That is, they verify (\ref{eqn:dae2}). The time-stepping is done by solving the nonlinear equation
+with initial conditions $x(0), z(0)$ that are consistent. That is, they verify (\ref{eqn:dae2}). The function $f(x,z,u)$ and $g(x,z,u)$ are computed in Matlab function \texttt{dae\_dfn.m}. 
+
+The time-stepping is done by solving the nonlinear equation
 \begin{align}
 	 0 &= F(x(t + \Delta t), z(t + \Delta t)), \label{eqn:cfn1} \\
 0 &= \left[
@@ -140,7 +142,7 @@ J &=
 \end{array}
 \right]
 \end{align}
-The analytic Jacobian is computed in two functions: (i) Function \texttt{jac\_dfn\_pre.m} computes Jacobian elements that are NOT state/time-dependent. (ii) Function \texttt{jac\_dfn.m} computes Jacobian elements that are state/time-dependent.
+The analytic Jacobian is computed in two functions: (i) Function \texttt{jac\_dfn\_pre.m} computes Jacobian elements that are NOT state/time-dependent. (ii) Function \texttt{jac\_dfn.m} computes Jacobian elements that are state/time-dependent. The secret to realizing fast and accurate simulations is carefully deriving the Jacobians and coding them in the functions above.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{DAEs}\label{sec:daes}
@@ -281,12 +283,6 @@ where the second row of $C_{cs}^{\pm}$ is $[C_{cs}^{\pm}]_2 = [0, 0, 1]$. Note w
 \end{equation}
 where $c_{e}, j_{n}^j$ are vectors whose elements represent discrete points along the $x$-dimension of the DFN model. The variable $c_{e,bc}^j$ represents the boundary values for region $j$, namely $c_{e,bc}^- = \left[c_{e,bc,1}, c_{e,bc,2} \right]^T$, $c_{e,bc}^{\sep} = \left[c_{e,bc,2}, c_{e,bc,3} \right]^T$, $c_{e,bc}^{+} = \left[c_{e,bc,3}, c_{e,bc,4} \right]^T$. The boundary values are computed by: $c_{e,bc}(t) = C_{ce} \ c_{e}(t)$ where $c_{e,bc} = \left[c_{e,bc,1}, c_{e,bc,2}, c_{e,bc,3}, c_{e,bc,4} \right]^T$.
 
-%Note that $i_{e,x}$ and $c_{e,x}$ represent the entire electrolyte current and concentration, respectively, across the entire battery, including boundary values,
-%\begin{eqnarray}
-%	i_{e,x}(t) &=& \left[0, \ i_{e}^{-}(x,t), \ I(x,t), \ i_{e}^{+}(x,t), \ 0 \right]^{T}, \label{eqn:iex} \\
-%	c_{e,x}(t) &=& \left[c_{e,bc,1}(t), \ c_{e}^{-}(x,t), c_{e,bc,2}(t), \ c_{e}^{sep}(x,t), c_{e,bc,3}(t), \ c_{e}^{+}(x,t), \ c_{e,bc,4}(t) \right]^{T}, \label{eqn:cex} \\ 
-%	c_{e,bc}(t) &=& C_{ce} \ c_{e}(t) 
-%\end{eqnarray}
 Note that the effective diffusivity, $D_e^{\eff,j}(c_e^j)$, and its derivative, $\frac{d D_e^{\eff,j}}{d c_e}(c_e^j)$, are state-dependent and must be computed online. The matrices $M^{j,1}_{ce}, M^{j,2}_{ce}, M^{j,3}_{ce}, M^{j,4}_{ce}, M^{j,5}_{ce}, C_{ce}$ are computed offline by Matlab function \texttt{c\_e\_mats.m}. These matrices are given by
 \begin{align}
 M^{j,1}_{ce} &=
@@ -699,21 +695,37 @@ for $j \in \{n,p\}$, $\alpha_{j} = (2 L^{j} \Delta x^{j})^{-1}$, $\beta_{j} = a_
 \begin{equation}
 	\frac{d}{dt} \phi_{e}^{-}(t) = F^{1}_{pe}(c_{e,x}) \cdot \phi_{e}(t) + F^{2}_{pe}(c_{e,x}) \cdot i_{e,x}(t) + F^{3}_{pe}(c_{e,x}) \cdot \ln(c_{e,x}(t)) 
 \end{equation}
-where vectors $i_{e,x}, c_{e,x}$ are given by (\ref{eqn:iex}),(\ref{eqn:cex}). Note that the system matrices $F^{1}_{pe}, F^{2}_{pe}, F^{3}_{pe}$ are state-varying.  These state matrices are computed online by Matlab function \texttt{phi\_e\_mats.m} as follows
+where vectors $i_{e,x}$ and $c_{e,x}$ represent the entire electrolyte current and concentration, respectively, across the entire battery, including boundary values,
 \begin{eqnarray}
-	F^{1}_{pe} &=& \kappa^{\eff} \cdot (M1) + (M2)(C), \\
-	F^{2}_{pe} &=& (M3), \\
-	F^{3}_{pe} &=& \kappa^{\eff}_D \cdot (M4)
+	i_{e,x}(t) &=& \left[0, \ i_{e}^{-}(x,t), \ I(x,t), \ i_{e}^{+}(x,t), \ 0 \right]^{T}, \label{eqn:iex} \\
+	c_{e,x}(t) &=& \left[c_{e,bc,1}(t), \ c_{e}^{-}(x,t), c_{e,bc,2}(t), \ c_{e}^{sep}(x,t), c_{e,bc,3}(t), \ c_{e}^{+}(x,t), \ c_{e,bc,4}(t) \right]^{T}, \label{eqn:cex} \\ 
+	c_{e,bc}(t) &=& C_{ce} \ c_{e}(t) 
 \end{eqnarray}
-
-DO BOUNDARY CONDITIONS NEXT
-
-and
+Note that the system matrices $F^{1}_{pe}, F^{2}_{pe}, F^{3}_{pe}$ are state-varying.  These state matrices are computed online as follows:
 \begin{eqnarray}
-	\alpha^{j} &=& \frac{1}{2 L^{j} \Delta x^{j}}, \qquad \beta^{j} = \frac{RT}{\alpha F} (1-t_{c}^{0})\frac{1 + 0}{2 L^{j} \Delta x^{j}}, \qquad \gamma = \frac{RT}{\alpha F} (1-t_{c}^{0}) (1 + 0) \\
-	\kappa(c_{e,x}(x,t)) &=& \left[ \kappa_{0} \mid \kappa_{n}(x) \mid \kappa_{ns} \mid \kappa_{s}(x) \mid \kappa_{sp} \mid \kappa_{p}(x) \mid \kappa_{N} \right]
+	F^{1}_{pe} &=& \kappa^{\eff}(c_e) \cdot M_{pe,1} + M_{pe,2} C_{pe}, \\
+	F^{2}_{pe} &=& M_{pe,3}, \\
+	F^{3}_{pe} &=& \kappa^{\eff}_D(c_e) M_{pe,4}
 \end{eqnarray}
-where the $0$ is $\beta^{j}$ and $\gamma$ arises when $\frac{d \ln f_{c/a}}{d \ln c_{e}}(x,t)$ in (\ref{eqn:phis}) is zero. 
+where
+\begin{eqnarray}
+	\kappa^{\eff}(c_e) &=& \kappa(c_e) \cdot (\varepsilon_e^j)^{\brug}, \\
+	\kappa^{\eff}_D(c_e) &=& \kappa^{\eff}(c_e) \frac{2RT}{F} (t_c^0 - 1) \left(1 + \frac{d \ln f_{c/a}}{d \ln c_{e}}(x,t) \right).
+\end{eqnarray}
+The matrices $M_{pe,1}, M_{pe,2}, M_{pe,3}, M_{pe,4}, C_{pe}$ are computed offline by Matlab function \texttt{phi\_e\_mats.m} as follows. Let
+\begin{equation}
+	\alpha^{j} = \frac{1}{2 L^{j} \Delta x^{j}}
+\end{equation}
+
+
+%DO BOUNDARY CONDITIONS NEXT
+%
+%and
+%\begin{eqnarray}
+%	\alpha^{j} &=& \frac{1}{2 L^{j} \Delta x^{j}}, \qquad \beta^{j} = \frac{RT}{\alpha F} (1-t_{c}^{0})\frac{1 + 0}{2 L^{j} \Delta x^{j}}, \qquad \gamma = \frac{RT}{\alpha F} (1-t_{c}^{0}) (1 + 0) \\
+%	\kappa(c_{e,x}(x,t)) &=& \left[ \kappa_{0} \mid \kappa_{n}(x) \mid \kappa_{ns} \mid \kappa_{s}(x) \mid \kappa_{sp} \mid \kappa_{p}(x) \mid \kappa_{N} \right]
+%\end{eqnarray}
+%where the $0$ is $\beta^{j}$ and $\gamma$ arises when $\frac{d \ln f_{c/a}}{d \ln c_{e}}(x,t)$ in (\ref{eqn:phis}) is zero. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Molar ion fluxes, i.e. Butler-Volmer Current, $j_{n}^{-}, j_{n}^{+}$}\label{sec:jn}

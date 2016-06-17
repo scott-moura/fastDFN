@@ -72,8 +72,8 @@ Along with these equations are corresponding boundary and initial conditions. Th
 The boundary conditions for the electrolyte-phase diffusion PDE (\ref{eqn:ce}) are given by
 \begin{align}
 	\pard{c_{e}}{x}(0^{-},t) &= \pard{c_{e}}{x}(0^{+},t) = 0, \label{eqn:ce-bc1} \\
-	\varepsilon_{e}^{-} D_{e}^{-}(L^{-}) \pard{c_{e}}{x}(L^{-},t) &= \varepsilon_{e}^{\textrm{sep}}D_{e}^{\textrm{sep}}(0^{\textrm{sep}}) \pard{c_{e}}{x}(0^{\textrm{sep}},t), \\
-	\varepsilon_{e}^{\textrm{sep}}D_{e}^{\textrm{sep}}(L^{\textrm{sep}}) \pard{c_{e}}{x}(L^{\textrm{sep}},t) &= \varepsilon_{e}^{+} D_{e}^{+}(L^{+}) \pard{c_{e}}{x}(L^{+},t), \\
+	D_{e}^{\eff,-}(c_e(L^{-})) \pard{c_{e}}{x}(L^{-},t) &= D_{e}^{\eff,\textrm{sep}}(c_e(0^{\textrm{sep}})) \pard{c_{e}}{x}(0^{\textrm{sep}},t), \\
+	D_{e}^{\textrm{\eff,sep}}(c_e(L^{\textrm{sep}})) \pard{c_{e}}{x}(L^{\textrm{sep}},t) &= D_{e}^{\eff,+}(c_e(L^{+})) \pard{c_{e}}{x}(L^{+},t), \\
 	c_{e}(L^{-},t) &= c_{e}(0^{\textrm{sep}},t), \\
 	c_{e}(L^{\textrm{sep}},t) &= c_{e}(0^+,t). \label{eqn:ce-bc5}
 \end{align}

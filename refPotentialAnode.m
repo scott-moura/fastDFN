@@ -1,4 +1,4 @@
-%% Reference Potential for Neg Electrode: Unref(theta_n)
+op%% Reference Potential for Neg Electrode: Unref(theta_n)
 %   Created July 12, 2011 by Scott Moura
 
 function [Uref,varargout] = refPotentialAnode(p,theta)

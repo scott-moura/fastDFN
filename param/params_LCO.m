@@ -128,8 +128,8 @@ p.n_Li_s = 2.5; %2.781;        % Total moles of lithium in solid phase [mol]
 p.c_e = 1e3;              % Fixed electrolyte concentration for SPM, [mol/m^3]
 
 %% Cutoff voltages
-p.volt_max = 4.7;
-p.volt_min = 2.6;
+p.volt_max = 4.1113; %4.7;
+p.volt_min = 3.105; %2.6;
 
 %% Discretization parameters
 % Discrete time step

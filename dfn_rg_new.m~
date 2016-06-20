@@ -43,7 +43,7 @@ OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*Delt
 %%%%%%%%%%%%%%% CONSTANT C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
 t = 0:p.delta_t:(120);
-Ir = -5*OneC*ones(size(t));
+Ir = 1*OneC*ones(size(t));
 
 %%%%%%%%%%%%%%% DYNAMIC CHARGE/DISCHARGE CYCLES FROM EXPERIMENTS %%%%%%%%%%%%%%%
 % load('data/Int_Obs/UDDS_data_Oct_26_2015_Sample_05sec');
@@ -57,7 +57,7 @@ beta = ones(NT,1);
 
 %% Initial Conditions & Preallocation
 % Solid concentration
-V0 = 3.9;
+V0 = 3.3;
 [csn0,csp0] = init_cs(p,V0);
 
 % Electrolyte concentration

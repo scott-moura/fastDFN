@@ -17,11 +17,11 @@ beta_err = 0.005;
 for idx = 1:maxiters
     
     % Simulate DFN Model forward
-    try
+%     try
         yc = dfn_rg_forward(p,x0,z0,I0,Ir,beta(idx));
-    catch err
-        yc = [1 1];
-    end
+%     catch err
+%         yc = [1 1];
+%     end
     
     % Constraints Satisfied?
     if(yc <= 0)
@@ -40,6 +40,7 @@ for idx = 1:maxiters
     % Constraints NOT satisfied
     else
         
+%         disp(yc)
         beta_high = beta(idx);
         
     end
@@ -69,11 +70,11 @@ x(:,1) = x0;
 z(:,1) = z0;
 
 % Preallocate and initailize Constrained outputs
-c_ss_p_Lp =  zeros(NT,1); % Niloofar add
-c_ss_p_Lp(1) = p.c_s_p_max * p.theta_min_p; % Niloofar add
+theta_Ln =  zeros(NT,1);
+theta_Ln(1) = p.rg.theta_min_n;
 
-c_ss_n_Ln =  zeros(NT,1); % Niloofar add
-c_ss_n_Ln(1) = p.c_s_n_max * p.theta_min_n; % Niloofar add
+theta_Lp =  zeros(NT,1);
+theta_Lp(1) = p.rg.theta_min_p;
 
 c_e_0n = zeros(NT,1);
 c_e_0n(1) = p.rg.c_e_min;
@@ -81,13 +82,25 @@ c_e_0n(1) = p.rg.c_e_min;
 c_e_0p = zeros(NT,1);
 c_e_0p(1) = p.rg.c_e_min;
 
-Temp = zeros(NT,1); % Niloofar added
-Temp(1) = p.rg.T_min;  % Niloofar added  
+Temp = zeros(NT,1);
+Temp(1) = p.rg.T_min;
 
 % eta_s_Ln = zeros(NT,1);
 % 
 % Volt = zeros(NT,1);
 % Volt(1) = 3.7; % Niloofar added
+
+% Vector lengths
+Ncsn = p.PadeOrder * (p.Nxn-1);
+Ncsp = p.PadeOrder * (p.Nxp-1);
+Nce = p.Nx - 3;
+Nc = Ncsn+Ncsp+Nce;
+Nn = p.Nxn - 1;
+Ns = p.Nxs - 1;
+Np = p.Nxp - 1;
+Nnp = Nn+Np;
+Nx = p.Nx - 3;
+Nz = 3*Nnp + Nx;
 
 % Simulate Forward
 for k = 1:(NT-1)
@@ -111,16 +124,18 @@ for k = 1:(NT-1)
     
     
     % Constraint Outputs
-    c_ss_n(:,k+1) = y(1:Nn);
-    c_ss_p(:,k+1) = y(Nn+1:Nnp);
+    theta_Ln(k+1) = y(Nn)/p.c_s_n_max;
+    theta_Lp(k+1) = y(Nn+1)/p.c_s_p_max;
     
-    c_ex(:,k+1) = y(2*Nnp+1:2*Nnp+Nx+4);
+%     c_ex(:,k+1) = y(2*Nnp+1:2*Nnp+Nx+4);
     
 %     eta_n(:,k+1) = y(2*Nnp+Nx+4+1 : 2*Nnp+Nx+4+Nn);
 %     eta_p(:,k+1) = y(2*Nnp+Nx+4+Nn+1 : 2*Nnp+Nx+4+Nn+Np);
     
     c_e_0n(k+1) = y(end-5);
     c_e_0p(k+1) = y(end-4);
+    
+    Temp(k+1) = x(end, k+1);
     
 %     eta_s_Ln(k+1) = y(end-3);
     
@@ -129,17 +144,12 @@ for k = 1:(NT-1)
 end
 
 if(k == NT-1)
-    yc = [c_e_min-c_e_0n, c_e_min-c_e_0p, -eta_s_Ln , ...      
-         c_e_0n-c_e_max, c_e_0p-c_e_max , ...   % Niloofar added
-         T_min-Temp , Temp-T_max,...                    
-        (c_ss_p_0p/c_s_p_max)-theta_max_p, ...
-        (c_ss_p_Lp/c_s_p_max)-theta_max_p, ...
-        theta_min_p-(c_ss_p_0p/c_s_p_max), ...
-        theta_min_p-(c_ss_p_Lp/c_s_p_max), ...
-        (c_ss_n_0n/c_s_n_max)-theta_max_n, ...
-        (c_ss_n_Ln/c_s_n_max)-theta_max_n, ...
-        theta_min_n-(c_ss_n_0n/c_s_n_max), ...
-        theta_min_n-(c_ss_n_Ln/c_s_n_max)];%, ... % negative if you violate
+    
+    yc = [p.rg.theta_min_n - theta_Ln, theta_Ln - p.rg.theta_max_n,...
+          p.rg.theta_min_p - theta_Lp, theta_Lp - p.rg.theta_max_p,...
+          p.rg.c_e_min - c_e_0n, c_e_0n - p.rg.c_e_max,...
+          p.rg.c_e_min - c_e_0p, c_e_0p - p.rg.c_e_max,...
+          p.rg.T_min - Temp, Temp - p.rg.T_max];
 
 % yc = [Volt_min-Volt, Volt-Volt_max]; % Niloofar added (use voltage as the only constraint)
 end

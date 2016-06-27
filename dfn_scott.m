@@ -28,7 +28,7 @@ OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*Delt
 %%%%%%%%%%%%%%% CONSTANT C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
 t = 0:p.delta_t:(120);
-I = 1*OneC*ones(size(t));
+I = 10*OneC*ones(size(t));
 
 %%%%%%%%%%%%%%% DYNAMIC CHARGE/DISCHARGE CYCLES FROM EXPERIMENTS %%%%%%%%%%%%%%%
 % load('data/Int_Obs/UDDS_data_Oct_26_2015_Sample_05sec');
@@ -177,16 +177,16 @@ x(:,1) = x0;
 z(:,1) = z0;
 
 %% Precompute data
-% Solid concentration matrices
-[A_csn,B_csn,A_csp,B_csp,C_csn,C_csp,A_csn_normalized, A_csp_normalized] = c_s_mats(p);
-p.A_csn = A_csn;
-p.A_csn_normalized= A_csn_normalized;
-p.B_csn = B_csn;
-p.A_csp = A_csp;
-p.A_csp_normalized=A_csp_normalized;
-p.B_csp = B_csp;
-p.C_csn = C_csn;
-p.C_csp = C_csp;
+% % Solid concentration matrices
+% [A_csn,B_csn,A_csp,B_csp,C_csn,C_csp,A_csn_normalized, A_csp_normalized] = c_s_mats(p);
+% p.A_csn = A_csn;
+% p.A_csn_normalized= A_csn_normalized;
+% p.B_csn = B_csn;
+% p.A_csp = A_csp;
+% p.A_csp_normalized=A_csp_normalized;
+% p.B_csp = B_csp;
+% p.C_csn = C_csn;
+% p.C_csp = C_csp;
 
 clear A_csn B_csn A_csp B_csp C_csn C_csp A_csn_normalized A_csp_normalized;
 

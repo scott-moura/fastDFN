@@ -9,11 +9,11 @@ N = p.PadeOrder;
 % load(['ws/pade_cs' num2str(N) '.mat']);
 
 % Replace symbolic expressions with numerical values
-b_vecn = symsubsnum(p.R_s_n, p.D_s_n0); %New Jan 10, 2014
-a_vecn = symsubsden(p.R_s_n, p.D_s_n0); %New Jan 10, 2014
+b_vecn = symsubsnum(p.R_s_n, p.D_s_n); %New Jan 10, 2014
+a_vecn = symsubsden(p.R_s_n, p.D_s_n); %New Jan 10, 2014
 
-b_vecp = symsubsnum(p.R_s_p, p.D_s_p0); %New Jan 10, 2014
-a_vecp = symsubsden(p.R_s_p, p.D_s_p0); %New Jan 10, 2014
+b_vecp = symsubsnum(p.R_s_p, p.D_s_p); %New Jan 10, 2014
+a_vecp = symsubsden(p.R_s_p, p.D_s_p); %New Jan 10, 2014
 
 bp_vecn = b_vecn / a_vecn(end);
 ap_vecn = a_vecn / a_vecn(end);
@@ -44,11 +44,11 @@ Cp = [C1p; C2p];
 
 %% Convert to Jordan-Form   NEW Apr 24, 2014
 % Similarity Matrix, computed symbolically
-Vn = [-(p.R_s_n^4*(9*sqrt(2429)-457))/(381150*p.D_s_n0^2), (p.R_s_n^4*(9*sqrt(2429)+457))/(381150*p.D_s_n0^2), 1;...
-       p.R_s_n^2*(sqrt(2429)-63)/(2310*p.D_s_n0), -p.R_s_n^2*(sqrt(2429)+63)/(2310*p.D_s_n0), 0;...
+Vn = [-(p.R_s_n^4*(9*sqrt(2429)-457))/(381150*p.D_s_n^2), (p.R_s_n^4*(9*sqrt(2429)+457))/(381150*p.D_s_n^2), 1;...
+       p.R_s_n^2*(sqrt(2429)-63)/(2310*p.D_s_n), -p.R_s_n^2*(sqrt(2429)+63)/(2310*p.D_s_n), 0;...
        1, 1, 0];
-Vp = [-(p.R_s_p^4*(9*sqrt(2429)-457))/(381150*p.D_s_p0^2), (p.R_s_p^4*(9*sqrt(2429)+457))/(381150*p.D_s_p0^2), 1;...
-       p.R_s_p^2*(sqrt(2429)-63)/(2310*p.D_s_p0), -p.R_s_p^2*(sqrt(2429)+63)/(2310*p.D_s_p0), 0;...
+Vp = [-(p.R_s_p^4*(9*sqrt(2429)-457))/(381150*p.D_s_p^2), (p.R_s_p^4*(9*sqrt(2429)+457))/(381150*p.D_s_p^2), 1;...
+       p.R_s_p^2*(sqrt(2429)-63)/(2310*p.D_s_p), -p.R_s_p^2*(sqrt(2429)+63)/(2310*p.D_s_p), 0;...
        1, 1, 0];
 
 An1 = Vn\An*Vn;
@@ -78,12 +78,12 @@ An = An2;
 An(3,:)=[0 0 0]; %reduce numerical error
 An(1,2)=0; %reduce numerical error
 An(2,1)=0; %reduce numerical error
-An_normalized=An/p.D_s_n0; %added by Federico for sensitivity analysis (equivalent to having D_s_n=1)
+An_normalized=An/p.D_s_n; %added by Federico for sensitivity analysis (equivalent to having D_s_n=1)
 Ap = Ap2;
 Ap(3,:)=[0 0 0]; %reduce numerical error
 Ap(1,2)=0; %reduce numerical error
 Ap(2,1)=0; %reduce numerical error
-Ap_normalized=Ap/p.D_s_p0; %added by Federico for sensitivity analysis (equivalent to having D_s_p=1)
+Ap_normalized=Ap/p.D_s_p; %added by Federico for sensitivity analysis (equivalent to having D_s_p=1)
 Bn = Bn2;
 Bp = Bp2;
 Cn = Cn2;

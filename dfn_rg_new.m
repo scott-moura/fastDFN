@@ -196,6 +196,11 @@ z(:,1) = z0;
 
 %% Precompute data
 % Solid concentration matrices
+
+% Use nominal values for Jacobian pre-calculation
+p.D_s_n = p.D_s_n0;
+p.D_s_p = p.D_s_p0;
+
 [A_csn,B_csn,A_csp,B_csp,C_csn,C_csp,A_csn_normalized, A_csp_normalized] = c_s_mats(p);
 p.A_csn = A_csn;
 p.A_csn_normalized= A_csn_normalized;
@@ -294,6 +299,21 @@ for k = 1:(NT-1)
     p.k_n = p.k_n0 * exp(p.E.kn/p.R*(1/p.T_ref - 1/T(k)));
     p.k_p = p.k_p0 * exp(p.E.kp/p.R*(1/p.T_ref - 1/T(k)));
     
+    % Solid concentration matrices
+    p.D_s_n = p.D_s_n0 * exp(p.E.Dsn/p.R*(1/p.T_ref - 1/T(k)));
+    p.D_s_p = p.D_s_n0 * exp(p.E.Dsp/p.R*(1/p.T_ref - 1/T(k)));
+    
+    [A_csn,B_csn,A_csp,B_csp,C_csn,C_csp] = c_s_mats(p);
+    p.A_csn = A_csn;
+    p.B_csn = B_csn;
+    p.A_csp = A_csp;
+    p.B_csp = B_csp;
+    p.C_csn = C_csn;
+    p.C_csp = C_csp;
+    
+    clear A_csn B_csn A_csp B_csp C_csn C_csp;
+    
+    
     % Reference Governor
     if(Ir(k) ~= 0)
         beta(k) = bisection_dfn(p,x(:,k),z(:,k),I(k),Ir(k));
@@ -308,20 +328,6 @@ for k = 1:(NT-1)
     else
         Cur_vec = [I(k-1), I(k), I(k+1)];
     end
-    
-    % Solid concentration matrices
-    p.D_s_n = p.D_s_n0 * exp(p.E.Dsn/p.R*(1/p.T_ref - 1/T(k)));
-    p.D_s_p = p.D_s_n0 * exp(p.E.Dsp/p.R*(1/p.T_ref - 1/T(k)));
-    
-    [A_csn,B_csn,A_csp,B_csp,C_csn,C_csp] = c_s_mats(p);
-    p.A_csn = A_csn;
-    p.B_csn = B_csn;
-    p.A_csp = A_csp;
-    p.B_csp = B_csp;
-    p.C_csn = C_csn;
-    p.C_csp = C_csp;
-    
-    clear A_csn B_csn A_csp B_csp C_csn C_csp;
     
     % Step-forward in time
     [x(:,k+1), z(:,k+1), stats] = cn_dfn(x(:,k),z(:,k),Cur_vec,p);

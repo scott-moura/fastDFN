@@ -42,7 +42,7 @@ NT = length(t);
 
 %% Initial Conditions & Preallocation
 % Solid concentration
-V0 = 4.2;
+V0 = 4.1;
 [csn0,csp0] = init_cs(p,V0);
 
 % Electrolyte concentration
@@ -187,8 +187,23 @@ z(:,1) = z0;
 % p.B_csp = B_csp;
 % p.C_csn = C_csn;
 % p.C_csp = C_csp;
+% 
+% clear A_csn B_csn A_csp B_csp C_csn C_csp A_csn_normalized A_csp_normalized;
 
-clear A_csn B_csn A_csp B_csp C_csn C_csp A_csn_normalized A_csp_normalized;
+% Adjust Temperature Dependent Parameters, based on present temperaure
+% Solid concentration matrices
+p.D_s_n = p.D_s_n0 * exp(p.E.Dsn/p.R*(1/p.T_ref - 1/T(1)));
+p.D_s_p = p.D_s_n0 * exp(p.E.Dsp/p.R*(1/p.T_ref - 1/T(1)));
+
+[A_csn,B_csn,A_csp,B_csp,C_csn,C_csp] = c_s_mats(p);
+p.A_csn = A_csn;
+p.B_csn = B_csn;
+p.A_csp = A_csp;
+p.B_csp = B_csp;
+p.C_csn = C_csn;
+p.C_csp = C_csp;
+
+clear A_csn B_csn A_csp B_csp C_csn C_csp;
 
 % Electrolyte concentration matrices
 [M1n,M2n,M3n,M4n,M5n, M1s,M2s,M3s,M4s, M1p,M2p,M3p,M4p,M5p, C_ce] = c_e_mats(p);

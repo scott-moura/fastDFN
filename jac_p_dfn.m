@@ -161,23 +161,28 @@ JGb = zeros(8,Nt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%% [DONE] Jacobian of c_s w.r.t. D_s_n, D_s_p
+%%% [IN-PROGRESS] Jacobian of c_s w.r.t. R_s_n, R_s_p ???
 
 %%%%%%%%%%%%%%%%%% Code written by Federico %%%%%%%%%%%%%%%%
 % Loop through each "comb tooth" in anode
-JF_csn = zeros(3,Nn);
+JF_csn_D = zeros(3,Nn);
+JF_csn_R = zeros(3,Nn);
 for idx = 1:Nn
-    JF_csn(:,idx) = p.A_csn_normalized*c_s_n_mat(:,idx);
+    JF_csn_D(:,idx) = p.A_csn_normalized_D*c_s_n_mat(:,idx);
+    JF_csn_R(:,idx) = p.A_csn_normalized_R*c_s_n_mat(:,idx);
 end
-JF(ind_csn,ind_Dsn) = reshape(JF_csn,[numel(JF_csn),1]);
+JF(ind_csn,ind_Dsn) = reshape(JF_csn_D,[numel(JF_csn_D),1]);
+JF(ind_csn,ind_Rsn) = reshape(JF_csn_R,[numel(JF_csn_R),1]);
 
 % Loop through each "comb tooth" in cathode
-JF_csp = zeros(3,Np);
+JF_csp_D = zeros(3,Np);
+JF_csp_R = zeros(3,Np);
 for idx = 1:Np
-    JF_csp(:,idx) = p.A_csp_normalized*c_s_p_mat(:,idx);
+    JF_csp_D(:,idx) = p.A_csp_normalized_D*c_s_p_mat(:,idx);
+    JF_csp_R(:,idx) = p.A_csp_normalized_R*c_s_p_mat(:,idx);
 end
-JF(ind_csp,ind_Dsp) = reshape(JF_csp,[numel(JF_csp),1]);
-
-%%% [IN-PROGRESS] Jacobian of c_s w.r.t. R_s_n, R_s_p ???
+JF(ind_csp,ind_Dsp) = reshape(JF_csp_D,[numel(JF_csp_D),1]);
+JF(ind_csp,ind_Rsp) = reshape(JF_csp_R,[numel(JF_csp_R),1]);
 
 
 
@@ -260,7 +265,7 @@ JF(ind_ce(Nn+p.Nxs : end),ind_tplusfca) = p.ce.M5p*jp / (1-p.t_plus);
 
 %%% [DONE] Jacobian of c_e w.r.t. epsilon_s_n, epsilon_s_p (via a_s)
 JF(ind_ce(1:Nn),ind_epsilonsn) = p.ce.M5n*jn / (p.epsilon_s_n);
-JF(ind_ce(Nn+p.Nxs : end),ind_tplusfca) = p.ce.M5p*jp / (p.epsilon_s_p);
+JF(ind_ce(Nn+p.Nxs : end),ind_epsilonsp) = p.ce.M5p*jp / (p.epsilon_s_p);
 
 
 %%% [DONE] Jacobian of c_e w.r.t. R_s_n, R_s_p (via a_s)
@@ -371,7 +376,7 @@ F3_pe = Kap_eff_D*p.M4_pe;
 
 
 %%% [DONE] Jacobian of phi_e w.r.t. kappa (actually, unity coeff)
-JG(ind_phi_e, ind_kappa) = F1_pe*phi_e + F2_pe*i_e_in + F3_pe*log(c_ex);
+JG(ind_phi_e, ind_kappa) = (Kap_eff*p.M1_pe)*phi_e + (Kap_eff_D*p.M4_pe)*log(c_ex);
 
 
 %%% [DONE] Jacobian of phi_e w.r.t. epsilon_e_n, epsilon_e_s, epsilon_e_p
@@ -422,7 +427,7 @@ JG(ind_phi_e, ind_epsilonep) = F1_pe_epsep*phi_e + F3_pe_epsep*log(c_ex);
 
 
 %%% [DONE] Jacobian of phi_e w.r.t. (1-p.t_plus)*(1+p.activity)
-JG(ind_phi_e, ind_tplusfca) = F3_pe*log(c_ex) ./ ((p.t_plus - 1) * (1 + p.dactivity));
+JG(ind_phi_e, ind_tplusfca) = -F3_pe*log(c_ex) ./ ((p.t_plus - 1) * (1 + p.dactivity));
 
 
 %%% [IN PROGRESS] Jacobian of phi_e w.r.t. L_n, L_s, L_p

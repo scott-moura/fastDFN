@@ -40,7 +40,7 @@ tic;
 %% Load DFN Data
 
 % DFN Data filename
-fn = 'data/sensitivity/zero_dfn.mat';
+fn = 'data/sensitivity/1C_dfn.mat';
 load(fn);
 disp(['Loaded DFN data file:  ' fn]);
 
@@ -141,6 +141,9 @@ theta0 = [p.D_s_n;...
     p.L_p];
 p.theta0 = theta0;
 
+% Normalization Factor
+N=diag(theta0)^2;
+
 %% Precompute Data
 % % Solid concentration matrices
 % [A_csn,B_csn,A_csp,B_csp,C_csn,C_csp,A_csn_normalized, A_csp_normalized] = c_s_mats(p);
@@ -160,7 +163,8 @@ p.theta0 = theta0;
 p.D_s_n = p.D_s_n0 * exp(p.E.Dsn/p.R*(1/p.T_ref - 1/T(1)));
 p.D_s_p = p.D_s_n0 * exp(p.E.Dsp/p.R*(1/p.T_ref - 1/T(1)));
 
-[A_csn,B_csn,A_csp,B_csp,C_csn,C_csp, A_csn_normalized,A_csp_normalized] = c_s_mats(p);
+[A_csn,B_csn,A_csp,B_csp,C_csn,C_csp, ...
+    A_csn_normalized_D,A_csp_normalized_D,A_csn_normalized_R,A_csp_normalized_R] = c_s_mats(p);
 p.A_csn = A_csn;
 p.B_csn = B_csn;
 p.A_csp = A_csp;
@@ -168,10 +172,12 @@ p.B_csp = B_csp;
 p.C_csn = C_csn;
 p.C_csp = C_csp;
 
-p.A_csn_normalized= A_csn_normalized;
-p.A_csp_normalized=A_csp_normalized;
+p.A_csn_normalized_D = A_csn_normalized_D;
+p.A_csp_normalized_D = A_csp_normalized_D;
+p.A_csn_normalized_R = A_csn_normalized_R;
+p.A_csp_normalized_R = A_csp_normalized_R;
 
-clear A_csn B_csn A_csp B_csp C_csn C_csp A_csn_normalized A_csp_normalized
+clear A_csn B_csn A_csp B_csp C_csn C_csp A_csn_normalized_D A_csp_normalized_D A_csn_normalized_R A_csp_normalized_R
 
 % Electrolyte concentration matrices
 [M1n,M2n,M3n,M4n,M5n, M1s,M2s,M3s,M4s, M1p,M2p,M3p,M4p,M5p, C_ce] = c_e_mats(p);
@@ -256,7 +262,7 @@ CCx = zeros(Ny, size(x,1));
 CCz = zeros(Ny, size(z,1));
 DD = zeros(Ny, Nt);
 
-% Voltage
+% Voltage Output
 CCz(1,ind_phi_s_p) = p.C_psp(2,:);
 CCz(1,ind_phi_s_n) = -p.C_psn(1,:);
 
@@ -290,13 +296,13 @@ for k = 1:(NT-1)
     %%% Assemble Matrices %% Sensitivity BCs enter as a correction to the
     %%% A*S term
     A = A11 - A12*(A22\A21);
-    B = B1 - A12*(A22\B2); 
+    B = (B1 - A12*(A22\B2))*N; %Normalized, HEP;
     
     A_nxt = A11_nxt - A12_nxt*(A22_nxt\A21_nxt);
-    B_nxt = B1_nxt - A12_nxt*(A22_nxt\B2_nxt);
+    B_nxt = (B1_nxt - A12_nxt*(A22_nxt\B2_nxt))*N; %Normalized, HEP;
     
     C_nxt = -(A22_nxt\A21_nxt);
-    D_nxt = -(A22_nxt\B2_nxt);
+    D_nxt = -(A22_nxt\B2_nxt)*N; %Normalized, HEP;
     
     MM = speye(size(x,1)) - p.delta_t/2 * A_nxt;
     AA = speye(size(x,1)) + p.delta_t/2 * A;
@@ -308,7 +314,6 @@ for k = 1:(NT-1)
     
     
     % Central Difference in time (More Accurate, Slower)
-
     S1(:,:,k+1) = (MM\AA)*S1(:,:,k) + (MM\BB);
     
     %%% Correct for the effect of BCs in sensitivity
@@ -321,7 +326,7 @@ for k = 1:(NT-1)
     
     S2(:,:,k+1) = C_nxt*S1(:,:,k+1) + D_nxt;
      %%%%%%%%%%%%%%%%%% Addition by Federico %%%%%%%%%%%%%%%%%%%%%%%
-    S3(:,:,k+1) = CCx*S1(:,:,k+1) + CCz*S2(:,:,k+1) + DD*diag(p.theta0);
+    S3(:,:,k+1) = CCx*S1(:,:,k+1) + CCz*S2(:,:,k+1) + DD*N; %Normalized, HEP;
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
@@ -336,3 +341,11 @@ for k = 1:(NT-1)
         t(k),Cur(k+1)/p.OneC,T(k+1)-273.15,SOC(k+1),Volt(k+1));
     
 end
+
+
+%% Computations on Sensitivity Vector
+S3_sqeeze = squeeze(S3);
+S3sq = S3_sqeeze*(S3_sqeeze');
+
+sensitivity = diag(S3sq).^(0.5);
+

@@ -28,7 +28,7 @@ p.OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*De
 %%%%%%%%%%%%%%% CONSTANT C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
 t = 0:p.delta_t:(120);
-I = 0*p.OneC*ones(size(t));
+I = 1*p.OneC*ones(size(t));
 
 %%%%%%%%%%%%%%% DYNAMIC CHARGE/DISCHARGE CYCLES FROM EXPERIMENTS %%%%%%%%%%%%%%%
 % load('data/Int_Obs/UDDS_data_Oct_26_2015_Sample_05sec');
@@ -417,7 +417,7 @@ out.x = x;
 out.z = z;
 out.simtime=simTime;
 
-save('data/sensitivity/zero_dfn.mat', 'out');
+save('data/sensitivity/1C_dfn.mat', 'out');
 
 
 

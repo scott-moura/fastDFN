@@ -23,12 +23,12 @@ run param/params_LCO
 [cn_high,cp_high] = init_cs(p,p.volt_max);
 Delta_cn = cn_high-cn_low;
 Delta_cp = cp_low-cp_high;
-OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*Delta_cp*p.Faraday/3600);
+p.OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*Delta_cp*p.Faraday/3600);
 
 %%%%%%%%%%%%%%% CONSTANT C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
 t = 0:p.delta_t:(120);
-I = 10*OneC*ones(size(t));
+I = 0*p.OneC*ones(size(t));
 
 %%%%%%%%%%%%%%% DYNAMIC CHARGE/DISCHARGE CYCLES FROM EXPERIMENTS %%%%%%%%%%%%%%%
 % load('data/Int_Obs/UDDS_data_Oct_26_2015_Sample_05sec');
@@ -360,7 +360,7 @@ for k = 1:(NT-1)
     eta_s_p = phi_s_p - phi_e(end-Np+1:end, :);
     
     fprintf(1,'Time : %3.2f sec | C-rate : %2.2f | Temp : %2.1fdegC | SOC : %1.3f | Voltage : %2.3fV | Newton Iters : %2.0f\n',...
-        t(k),I(k+1)/OneC,T(k+1)-273.15,SOC(k+1),Volt(k+1),stats.iters);
+        t(k),I(k+1)/p.OneC,T(k+1)-273.15,SOC(k+1),Volt(k+1),stats.iters);
     
     if(Volt(k+1) < p.volt_min)
         fprintf(1,'Min Voltage of %1.1fV exceeded\n',p.volt_min);
@@ -389,20 +389,35 @@ disp(' animate_dfn')
 
 
 %% Save Output Data for Plotting
+% out.date=date;
+% out.time=t;
+% out.cur=I;
+% out.volt=Volt;
+% out.soc=SOC;
+% out.c_ss_n=c_ss_n;
+% out.c_ss_p=c_ss_p;
+% out.temp = T;
+% % out.eta_s_Ln=eta_s_Ln;
+% out.ce0n=c_e_0n;
+% out.ce0p=c_e_0p;
+% out.simtime=simTime;
+
+% save('data/Int_Obs/dfn_UDDS_NCM20Q.mat', '-struct', 'out');
+% save('data/new/dfn_ce_new.mat', '-struct', 'out'); %10C Discharge LiCoO2
+
+%% Save Output Data for Sensitivity Analysis
 out.date=date;
+out.p = p;
 out.time=t;
 out.cur=I;
 out.volt=Volt;
 out.soc=SOC;
-out.c_ss_n=c_ss_n;
-out.c_ss_p=c_ss_p;
-out.temp = T;
-% out.eta_s_Ln=eta_s_Ln;
-out.ce0n=c_e_0n;
-out.ce0p=c_e_0p;
+out.temp=T;
+out.x = x;
+out.z = z;
 out.simtime=simTime;
 
-% save('data/Int_Obs/dfn_UDDS_NCM20Q.mat', '-struct', 'out');
-% save('data/new/dfn_ce_new.mat', '-struct', 'out'); %10C Discharge LiCoO2
+save('data/sensitivity/zero_dfn.mat', 'out');
+
 
 

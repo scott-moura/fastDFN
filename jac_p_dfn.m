@@ -161,7 +161,7 @@ JGb = zeros(8,Nt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%% [DONE] Jacobian of c_s w.r.t. D_s_n, D_s_p
-%%% [IN-PROGRESS] Jacobian of c_s w.r.t. R_s_n, R_s_p ???
+%%% [DONE] Jacobian of c_s w.r.t. R_s_n, R_s_p
 
 %%%%%%%%%%%%%%%%%% Code written by Federico %%%%%%%%%%%%%%%%
 % Loop through each "comb tooth" in anode
@@ -376,7 +376,7 @@ F3_pe = Kap_eff_D*p.M4_pe;
 
 
 %%% [DONE] Jacobian of phi_e w.r.t. kappa (actually, unity coeff)
-JG(ind_phi_e, ind_kappa) = (Kap_eff*p.M1_pe)*phi_e + (Kap_eff_D*p.M4_pe)*log(c_ex);
+JG(ind_phi_e, ind_kappa) = (Kap_eff*p.M1_pe + M2_pe*p.C_pe)*phi_e + (Kap_eff_D*p.M4_pe)*log(c_ex);
 
 
 %%% [DONE] Jacobian of phi_e w.r.t. epsilon_e_n, epsilon_e_s, epsilon_e_p
@@ -470,9 +470,7 @@ JG(ind_jp,ind_Rfp) = 2/p.Faraday * i_0p .* cosh(aFRT * eta_p) .* aFRT .* (-p.Far
 
 %% Sparsify Jacobian
 JF = sparse(JF); %HEP
-%JF = sparse(JF * diag(p.theta0)); %not required
 JFb = sparse(JFb); 
 JG = sparse(JG); %HEP
-%JG = sparse(JG * diag(p.theta0)); %not required
 JGb = sparse(JGb);
 

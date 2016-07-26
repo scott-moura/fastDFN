@@ -9,7 +9,7 @@ figure(1)
 clf
 
 subplot(4,1,1)
-plot(t,I/OneC,'LineWidth',2)
+plot(t,I/p.OneC,'LineWidth',2)
 ylabel('Current [C-rate, h^{-1}]','FontSize', fs)
 set(gca,'FontSize', fs)
 legend({'$$I(t)$$'},'interpreter','latex')
@@ -44,7 +44,7 @@ figure(2)
 clf
 
 subplot(3,1,1)
-plot(t,I/OneC,'LineWidth',2)
+plot(t,I/p.OneC,'LineWidth',2)
 ylabel('Current [C-rate, h^{-1}]','FontSize', fs)
 set(gca,'FontSize', fs)
 legend({'$$I(t)$$'},'interpreter','latex')

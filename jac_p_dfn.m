@@ -1,6 +1,7 @@
 %% Jacobian w.r.t. Parameters for Doyle-Fuller-Newman Model
 %   Created Feb 18, 2014 by Scott Moura
 %   Rebooted Jul 23, 2016 by Scott Moura for Samsung GRO project
+%   Updated Sep 22, 2016 by Scott Moura for Bosch RTC project
 %
 %   INPUTS
 %   x   : States      c_s_n, c_s_p, c_e, T
@@ -28,14 +29,14 @@
 %   11 : epsilon_e_s
 %   12 : epsilon_e_p
 %   13 : kappa
-%   14 : (1+t_plus)(1 + d ln f_ca / d ln c_e)
-%   15 : k_n
-%   16 : k_p
-%   17 : R_f_n
-%   18 : R_f_p
-%   19 : L_n
-%   20 : L_s
-%   21 : L_p
+%   14 : t_plus
+%   15 : d ln f_ca / d ln c_e
+%   16 : k_n
+%   17 : k_p
+%   18 : R_f_n
+%   19 : R_f_p
+%   20 : n_Li_s
+%   21 : c_e0
 
 function [JF, JFb, JG, JGb] = jac_p_dfn(x,z,Cur,p)
 
@@ -73,6 +74,28 @@ ind_phi_e = 2*Nnp+1 : 2*Nnp+Nx+2;
 ind_jn = 2*Nnp+Nx+3 : 2*Nnp+Nx+2+Nn;
 ind_jp = 2*Nnp+Nx+2+Nn+1 : Nz;
 
+%   1  : D_s_n
+%   2  : D_s_p
+%   3  : R_s_n
+%   4  : R_s_p
+%   5  : epsilon_s_n
+%   6  : epsilon_s_p
+%   7  : 1/sig_n
+%   8  : 1/sig_p
+%   9  : D_e
+%   10 : epsilon_e_n
+%   11 : epsilon_e_s
+%   12 : epsilon_e_p
+%   13 : kappa
+%   14 : t_plus
+%   15 : d ln f_ca / d ln c_e
+%   16 : k_n
+%   17 : k_p
+%   18 : R_f_n
+%   19 : R_f_p
+%   20 : n_Li_s
+%   21 : c_e0
+
 % Parameter indices
 ind_Dsn = 1;        %   1  : D_s_n
 ind_Dsp = 2;        %   2  : D_s_p
@@ -87,14 +110,14 @@ ind_epsilonen = 10; %   10 : epsilon_e_n
 ind_epsilones = 11; %   11 : epsilon_e_s
 ind_epsilonep = 12; %   12 : epsilon_e_p
 ind_kappa = 13;     %   13 : kappa
-ind_tplusfca = 14;  %   14 : (1+t_plus)(1 + d ln f_ca / d ln c_e)
-ind_kn = 15;        %   15 : k_n
-ind_kp = 16;        %   16 : k_p
-ind_Rfn = 17;       %   17 : R_f_n
-ind_Rfp = 18;       %   18 : R_f_p
-ind_Ln = 19;        %   19 : L_n
-ind_Ls = 20;        %   20 : L_s
-ind_Lp = 21;        %   21 : L_p
+ind_tplus = 14;     %   14 : t_plus
+ind_fca = 15;       %   15 : d ln f_ca / d ln c_e
+ind_kn = 16;        %   16 : k_n
+ind_kp = 17;        %   17 : k_p
+ind_Rfn = 18;       %   18 : R_f_n
+ind_Rfp = 19;       %   19 : R_f_p
+ind_nLis = 20;      %   20 : n_Li_s
+ind_ce0 = 21;       %   21 : c_e0
 
 
 % PARSE OUT THE STATES
@@ -258,9 +281,9 @@ JF(ind_ce(Nn+p.Nxs : end),ind_epsilonep) = ...
     + D_ep_eff_depse.*(p.ce.M3p*c_ep + p.ce.M4p*c_e_bcs(3:4)) + p.ce.M5p*jp*(-1/p.epsilon_e_p);
 
 
-%%% [DONE] Jacobian of c_e w.r.t. (1-t_plus)*(1+0)
-JF(ind_ce(1:Nn),ind_tplusfca) = p.ce.M5n*jn / (1-p.t_plus);
-JF(ind_ce(Nn+p.Nxs : end),ind_tplusfca) = p.ce.M5p*jp / (1-p.t_plus);
+%%% [DONE] Jacobian of c_e w.r.t. t_plus
+JF(ind_ce(1:Nn),ind_tplus) = -p.ce.M5n*jn / (1-p.t_plus);
+JF(ind_ce(Nn+p.Nxs : end),ind_tplus) = -p.ce.M5p*jp / (1-p.t_plus);
 
 
 %%% [DONE] Jacobian of c_e w.r.t. epsilon_s_n, epsilon_s_p (via a_s)
@@ -426,12 +449,18 @@ JG(ind_phi_e, ind_epsilones) = F1_pe_epses*phi_e + F3_pe_epses*log(c_ex);
 JG(ind_phi_e, ind_epsilonep) = F1_pe_epsep*phi_e + F3_pe_epsep*log(c_ex);
 
 
-%%% [DONE] Jacobian of phi_e w.r.t. (1-p.t_plus)*(1+p.activity)
-JG(ind_phi_e, ind_tplusfca) = -F3_pe*log(c_ex) ./ ((p.t_plus - 1) * (1 + p.dactivity));
+% %%% [DONE] Jacobian of phi_e w.r.t. (1-p.t_plus)*(1+p.activity)
+% JG(ind_phi_e, ind_tplusfca) = -F3_pe*log(c_ex) ./ ((p.t_plus - 1) * (1 + p.dactivity));
+
+%%% [IN PROGRESS] Jacobian of phi_e w.r.t. p.t_plus
+JG(ind_phi_e, ind_tplus) = -F3_pe*log(c_ex) ./ ((1- p.t_plus));
+
+%%% [IN PROGRESS] Jacobian of phi_e w.r.t. p.activity
+JG(ind_phi_e, ind_fca) = F3_pe*log(c_ex) ./ ((1 + p.dactivity));
 
 
 %%% [IN PROGRESS] Jacobian of phi_e w.r.t. L_n, L_s, L_p
-
+% ignore for now
 
 
 %% [DONE] Butler-Volmer Equation

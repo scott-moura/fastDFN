@@ -41,7 +41,7 @@ tic;
 %% Load DFN Data
 
 % DFN Data filename
-fn = 'data/sensitivity/1C_shortdur_dfn.mat';
+fn = 'data/sensitivity/UDDSx2_dfn.mat';
 load(fn);
 disp(['Loaded DFN data file:  ' fn]);
 
@@ -143,30 +143,7 @@ theta0 = [p.D_s_n;...
 p.theta0 = theta0;
 
 % Normalization Factor
-N=diag(theta0)^2;
-
-% Parameter indices
-ind_Dsn = 1;        %   1  : D_s_n
-ind_Dsp = 2;        %   2  : D_s_p
-ind_Rsn = 3;        %   3  : R_s_n
-ind_Rsp = 4;        %   4  : R_s_p
-ind_epsilonsn = 5;  %   5  : epsilon_s_n
-ind_epsilonsp = 6;  %   6  : epsilon_s_p
-ind_sign = 7;       %   7  : 1/sig_n
-ind_sigp = 8;       %   8  : 1/sig_p
-ind_De = 9;         %   9  : D_e
-ind_epsilonen = 10; %   10 : epsilon_e_n
-ind_epsilones = 11; %   11 : epsilon_e_s
-ind_epsilonep = 12; %   12 : epsilon_e_p
-ind_kappa = 13;     %   13 : kappa
-ind_tplus = 14;     %   14 : t_plus
-ind_fca = 15;       %   15 : d ln f_ca / d ln c_e
-ind_kn = 16;        %   16 : k_n
-ind_kp = 17;        %   17 : k_p
-ind_Rfn = 18;       %   18 : R_f_n
-ind_Rfp = 19;       %   19 : R_f_p
-ind_nLis = 20;      %   20 : n_Li_s
-ind_ce0 = 21;       %   21 : c_e0
+N=diag(theta0).^2;
 
 %% Precompute Data
 % % Solid concentration matrices
@@ -298,24 +275,7 @@ S2 = zeros(size(z,1), Nt, NT);  % Sensitivity of z vars
 S3 = zeros(Ny, Nt, NT);         % Sensitivity of outputs
 
 %% Initialize Sensitivities S_{1,0}
-% preallocate IC for sensitivity diff eqns
-S10 = zeros(size(x,1), Nt);
-
-% Jacobian of c_s w.r.t. n_Li_s
-J_csn0_nLis = zeros(p.PadeOrder,1);
-J_csp0_nLis = zeros(p.PadeOrder,1);
-
-J_csn0_nLis(3) = 1/(p.epsilon_s_n*p.L_n*p.Area);
-J_csp0_nLis(3) = 1/(p.epsilon_s_p*p.L_p*p.Area);
-
-S10(ind_csn,ind_nLis) = repmat(J_csn0_nLis, [Nn 1]);
-S10(ind_csp,ind_nLis) = repmat(J_csp0_nLis, [Np 1]);
-
-% Jacobian of c_e(0) w.r.t. p.c_e;
-S10(ind_ce,ind_ce0) = 1;
-
-% save IC into S1 array
-S1(:,:,1) = S10;
+S10 = zeros(size(x,1),
 
 %% Solve Sensitivity Eqns
 disp('Solving Sensitivity Eqns...');
@@ -368,10 +328,16 @@ for k = 1:(NT-1)
 %     S1(:,17,k+1) = S1(:,17,k+1) + (MM\AA_corr_p);
     
     S2(:,:,k+1) = C_nxt*S1(:,:,k+1) + D_nxt;
+    
+    
      %%%%%%%%%%%%%%%%%% Addition by Federico %%%%%%%%%%%%%%%%%%%%%%%
     S3(:,:,k+1) = CCx*S1(:,:,k+1) + CCz*S2(:,:,k+1) + DD*N; %Normalized, HEP;
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+
+     %%%%%%%%%%%%%%%%%% Addition by Scott %%%%%%%%%%%%%%%%%%%%%%%
+%      S3(:,:,k+1) = (CCx - CCz*(A22_nxt\A21_nxt))*S1(:,:,k+1) + CCz*D_nxt + DD*N;
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
     
     %%% Error Checking
     if(isnan(any(S1(:,:,k+1))))

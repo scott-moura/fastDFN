@@ -27,10 +27,10 @@ p.OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*De
 
 %%%%%%%%%%%%%%% MANUAL INPUT WITH C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
-t = 0:p.delta_t:(120+60+10);
+t = 0:p.delta_t:(120);
 I = zeros(size(t));
-I(11:40) = 5*p.OneC;
-I((40+91):(40+90+30)) = -5*p.OneC;
+% I(11:40) = 5*p.OneC;
+% I((40+91):(40+90+30)) = -5*p.OneC;
 
 % I = 5*p.OneC*ones(size(t));
 
@@ -422,7 +422,7 @@ out.x = x;
 out.z = z;
 out.simtime=simTime;
 
-save('data/sensitivity/5C_meddur_dfn.mat', 'out');
+save('data/sensitivity/0C_dfn.mat', 'out');
 
 
 

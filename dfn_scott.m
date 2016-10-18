@@ -28,7 +28,7 @@ p.OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*De
 %%%%%%%%%%%%%%% MANUAL INPUT WITH C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
 t = 0:p.delta_t:(120);
-I = zeros(size(t));
+I = 5*ones(size(t));
 % I(11:40) = 5*p.OneC;
 % I((40+91):(40+90+30)) = -5*p.OneC;
 
@@ -363,9 +363,9 @@ for k = 1:(NT-1)
     eta_s_n = phi_s_n - phi_e(1:Nn,:);
     eta_s_p = phi_s_p - phi_e(end-Np+1:end, :);
   
-  % Commented by SHP.  
-  %  fprintf(1,'Time : %3.2f sec | C-rate : %2.2f | Temp : %2.1fdegC | SOC : %1.3f | Voltage : %2.3fV | Newton Iters : %2.0f\n',...
-  %      t(k),I(k+1)/p.OneC,T(k+1)-273.15,SOC(k+1),Volt(k+1),stats.iters);
+%   Commented by SHP.  
+   fprintf(1,'Time : %3.2f sec | C-rate : %2.2f | Temp : %2.1fdegC | SOC : %1.3f | Voltage : %2.3fV | Newton Iters : %2.0f\n',...
+       t(k),I(k+1)/p.OneC,T(k+1)-273.15,SOC(k+1),Volt(k+1),stats.iters);
     
     if(Volt(k+1) < p.volt_min)
         fprintf(1,'Min Voltage of %1.1fV exceeded\n',p.volt_min);
@@ -422,7 +422,7 @@ out.x = x;
 out.z = z;
 out.simtime=simTime;
 
-save('data/sensitivity/0C_dfn.mat', 'out');
+% save('data/sensitivity/0C_dfn.mat', 'out');
 
 
 

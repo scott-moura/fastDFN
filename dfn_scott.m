@@ -304,7 +304,7 @@ for k = 1:(NT-1)
     
     % Solid concentration matrices
     p.D_s_n = p.D_s_n0 * exp(p.E.Dsn/p.R*(1/p.T_ref - 1/T(k)));
-    p.D_s_p = p.D_s_n0 * exp(p.E.Dsp/p.R*(1/p.T_ref - 1/T(k)));
+    p.D_s_p = p.D_s_p0 * exp(p.E.Dsp/p.R*(1/p.T_ref - 1/T(k)));
     
     [A_csn,B_csn,A_csp,B_csp,C_csn,C_csp] = c_s_mats(p);
     p.A_csn = A_csn;

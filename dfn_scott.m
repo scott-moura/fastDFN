@@ -27,8 +27,8 @@ p.OneC = min(p.epsilon_s_n*p.L_n*Delta_cn*p.Faraday/3600, p.epsilon_s_p*p.L_p*De
 
 %%%%%%%%%%%%%%% MANUAL INPUT WITH C-RATE %%%%%%%%%%%%%%%%%%%%%%%%%
 p.delta_t = 1;
-t = 0:p.delta_t:(120);
-I = 5*ones(size(t));
+t = 0:p.delta_t:(180);
+I = 5*p.OneC*ones(size(t));
 % I(11:40) = 5*p.OneC;
 % I((40+91):(40+90+30)) = -5*p.OneC;
 

@@ -9,8 +9,9 @@ fs = 18;
 
 params = {'$D_s^{^{\_}}$','$D_s^+$','$R_s^-$','$R_s^+$','$\varepsilon_s^{^{\_}}$','$\varepsilon_s^+$',...
     '$1/\sigma^{^{\_}}$','$1/\sigma^+$','$D_e$','$\varepsilon_e^{^{\_}}$','$\varepsilon_e^{sep}$','$\varepsilon_e^+$',...
-    '$\kappa$',' ','$k^{^{\_}}$','$k^+$',...
-    '$R_f^{^{\_}}$','$R_f^+$','$L^{^{\_}}$','$L^{sep}$','$L^{+}$'};
+    '$\kappa$','$t^{+}_{0}$','\frac{d \ln f_{c/a}}{d \ln c_e}$','$k^{^{\_}}$','$k^+$',...
+    '$R_f^{^{\_}}$','$R_f^+$','$n_{Li,s}$','c_{e,0}'};
+Nt = length(params);
 
 %'$(1+t^{+}_{0})(1+\frac{d \ln f_{c/a}}{d \ln c_e})$'
 
@@ -18,7 +19,7 @@ params = {'$D_s^{^{\_}}$','$D_s^+$','$R_s^-$','$R_s^+$','$\varepsilon_s^{^{\_}}$
 
 %%%%%%%%%%%%%%%%%% Start Commented by Federico %%%%%%%%%%%%%%%%%%%%%%
 % Load Sensitivities
-fn= 'data/sensitivity/sensitivity_UDDSx2.mat';
+fn= 'data/sensitivity/sensitivity_5C_meddur.mat';
 load(fn);
 disp(['Loaded Sensitivity data file:  ' fn]); 
 

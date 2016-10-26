@@ -41,7 +41,7 @@ tic;
 %% Load DFN Data
 
 % DFN Data filename
-fn = 'data/sensitivity/1C_shortdur_dfn.mat';
+fn = 'data/sensitivity/0C_dfn.mat';
 load(fn);
 disp(['Loaded DFN data file:  ' fn]);
 

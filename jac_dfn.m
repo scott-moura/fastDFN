@@ -217,11 +217,33 @@ kappa_effN = kappaN .* p.epsilon_e_p.^(p.brug);
 kappa_eff = [kappa_eff_n; kappa_eff_ns; kappa_eff_s; kappa_eff_sp; kappa_eff_p];
 Kap_eff = sparse(diag(kappa_eff));
 
-% Diffusional Conductivity
-bet = (2*p.R*T)/(p.Faraday) * (p.t_plus - 1) * (1 + p.dactivity);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Diffusional Conductivity - electrolyteAct % Oct.25 by Saehong Park
+
+%%%bet_org = (2*p.R*T)/(p.Faraday) * (p.t_plus - 1) * (1 + p.dactivity); %
+%When dactivity is constant
+
+[dactivity, ddactivity] = electrolyteAct(c_ex,T,p);
+dActivity0 = dactivity(1);                              % BC1
+dActivity_n = dactivity(2:p.Nxn);
+dActivity_ns = dactivity(p.Nxn+1);
+dActivity_s = dactivity(p.Nxn+2 : p.Nxn+2+p.Nxs-2);
+dActivity_sp = dactivity(p.Nxn+2+p.Nxs-1);
+dActivity_p = dactivity(p.Nxn+2+p.Nxs : end-1);
+dActivityN = dactivity(end);                            % BC2
+
+dActivity = [dActivity_n; dActivity_ns; dActivity_s; dActivity_sp; dActivity_p];
+
+bet = (2*p.R*T)/(p.Faraday) * (p.t_plus - 1) * (1 + dActivity);
+bet_mat = sparse(diag(bet));
 
 % Modified effective conductivity
-Kap_eff_D = bet*Kap_eff;
+%Kap_eff_D_org = bet_org*Kap_eff;% When dactivity is constant
+Kap_eff_D = bet_mat*Kap_eff;
+
+% No effect on boundary? i.e., kappa_effN, kappa_eff0
+% Incomplete to add 'Derivative w.r.t c_e'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Form Matrices
 M2_pe = p.M2_pe;

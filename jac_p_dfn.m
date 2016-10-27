@@ -382,11 +382,34 @@ kappa_effN = kappaN .* p.epsilon_e_p.^(p.brug);
 kappa_eff = [kappa_eff_n; kappa_eff_ns; kappa_eff_s; kappa_eff_sp; kappa_eff_p];
 Kap_eff = sparse(diag(kappa_eff));
 
-% Diffusional Conductivity
-bet = (2*p.R*T)/(p.Faraday) * (p.t_plus - 1) * (1 + p.dactivity);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Diffusional Conductivity - electrolyteAct % Oct.25 by Saehong Park
+
+%%%bet_org = (2*p.R*T)/(p.Faraday) * (p.t_plus - 1) * (1 + p.dactivity); %
+%When dactivity is constant
+
+[dactivity, ddactivity] = electrolyteAct(c_ex,T,p);
+dActivity0 = dactivity(1);                              % BC1
+dActivity_n = dactivity(2:p.Nxn);
+dActivity_ns = dactivity(p.Nxn+1);
+dActivity_s = dactivity(p.Nxn+2 : p.Nxn+2+p.Nxs-2);
+dActivity_sp = dactivity(p.Nxn+2+p.Nxs-1);
+dActivity_p = dactivity(p.Nxn+2+p.Nxs : end-1);
+dActivityN = dactivity(end);                            % BC2
+
+dActivity = [dActivity_n; dActivity_ns; dActivity_s; dActivity_sp; dActivity_p];
+
+bet = (2*p.R*T)/(p.Faraday) * (p.t_plus - 1) * (1 + dActivity);
+bet_mat = sparse(diag(bet));
 
 % Modified effective conductivity
-Kap_eff_D = bet*Kap_eff;
+%Kap_eff_D_org = bet_org*Kap_eff;% When dactivity is constant
+Kap_eff_D = bet_mat*Kap_eff;
+
+% No effect on boundary? i.e., kappa_effN, kappa_eff0
+% Incomplete to add 'Derivative w.r.t c_e'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 % Form Matrices
 M2_pe = p.M2_pe;
@@ -429,9 +452,9 @@ Kap_eff_epses = sparse(diag(kappa_eff_epses));
 Kap_eff_epsep = sparse(diag(kappa_eff_epsep));
 
 % Modified effective conductivity
-Kap_eff_D_epsen = bet*Kap_eff_epsen;
-Kap_eff_D_epses = bet*Kap_eff_epses;
-Kap_eff_D_epsep = bet*Kap_eff_epsep;
+Kap_eff_D_epsen = bet_mat*Kap_eff_epsen;
+Kap_eff_D_epses = bet_mat*Kap_eff_epses;
+Kap_eff_D_epsep = bet_mat*Kap_eff_epsep;
 
 
 F1_pe_epsen = Kap_eff_epsen*p.M1_pe;
@@ -455,8 +478,8 @@ JG(ind_phi_e, ind_epsilonep) = F1_pe_epsep*phi_e + F3_pe_epsep*log(c_ex);
 %%% [IN PROGRESS] Jacobian of phi_e w.r.t. p.t_plus
 JG(ind_phi_e, ind_tplus) = -F3_pe*log(c_ex) ./ ((1- p.t_plus));
 
-%%% [IN PROGRESS] Jacobian of phi_e w.r.t. p.activity
-JG(ind_phi_e, ind_fca) = F3_pe*log(c_ex) ./ ((1 + p.dactivity));
+%%% [DONE] Jacobian of phi_e w.r.t. dActivity
+JG(ind_phi_e, ind_fca) = F3_pe*log(c_ex) ./ ((1 + dActivity)); % SHP
 
 
 %%% [IN PROGRESS] Jacobian of phi_e w.r.t. L_n, L_s, L_p
@@ -473,8 +496,8 @@ aFRT = (p.alph*p.Faraday)/(p.R*T);
 % Equilibrium Potential, U^{\pm}(c_ss)
 theta_n = c_ss_n / p.c_s_n_max;
 theta_p = c_ss_p / p.c_s_p_max;
-Unref = refPotentialAnode(p, theta_n);
-Upref = refPotentialCathode(p, theta_p);
+[Unref, dUnref] = refPotentialAnode(p, theta_n);
+[Upref, dUpref] = refPotentialCathode(p, theta_p);
 
 % Overpotential, \eta
 eta_n = phi_s_n - phi_e(1:Nn) - Unref - p.Faraday*p.R_f_n*jn;
@@ -482,6 +505,48 @@ eta_p = phi_s_p - phi_e(end-Np+1:end) - Upref - p.Faraday*p.R_f_p*jp;
 
 % [DONE] Jacobian of jn w.r.t. k_n
 JG(ind_jn,ind_kn) = 2/p.Faraday .* sinh(aFRT * eta_n) .* ((p.c_s_n_max - c_ss_n) .* c_ss_n .* c_en).^p.alph;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%[SHP][COMPLETE] Jacobian of jn w.r.t Ds, Rs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2016.10.15
+
+% From c_s_mats
+% Should I use Jordan form?
+
+dCcssdDsn = [-6*3465*(p.D_s_n0)/(p.R_s_n^5),(-4*3465)/(11*(p.R_s_n^3)),0];
+
+%%% w.r.t Ds
+% Anode
+dC_ss_ndDsn = (dCcssdDsn*c_s_n_mat)';
+JG(ind_jn,ind_Dsn) = 2/p.Faraday .* (p.k_n/2) .* ((-2*c_ss_n .* c_en ) + (c_en .* p.c_s_n_max)) .* dC_ss_ndDsn ./ sqrt((c_en .* p.c_s_n_max .* c_ss_n) - (c_en .* (c_ss_n.^2))) .* sinh(aFRT * eta_n) ...
+                     + 2/p.Faraday .* i_0n .* cosh(aFRT* eta_n) .* aFRT .* -1 .* (dUnref.*dC_ss_ndDsn);
+
+% Cathode                 
+dCcssdDsp = [-6*3465*(p.D_s_p0)/(p.R_s_p^5),(-4*3465)/(11*(p.R_s_p^3)),0];
+
+dC_ss_pdDsp = (dCcssdDsp*c_s_p_mat)';
+JG(ind_jp,ind_Dsp) = 2/p.Faraday .* (p.k_p/2) .* ((-2*c_ss_p .* c_ep ) + (c_ep .* p.c_s_p_max)) .* dC_ss_pdDsp ./ sqrt((c_ep .* p.c_s_p_max .* c_ss_p) - (c_ep .* (c_ss_p.^2))) .* sinh(aFRT * eta_p) ...
+                     + 2/p.Faraday .* i_0p .* cosh(aFRT* eta_p) .* aFRT .* -1 .* (dUpref.*dC_ss_pdDsp);
+                 
+%%% w.r.t Rs          
+% Anode
+dCcssdRsn = [-5*-3*3465*(p.D_s_n0^2)/(p.R_s_n^6), -3*-4*3465*(p.D_s_n0)/(11*(p.R_s_n^4)), -1*-3465/(165*(p.R_s_n^2))];                 
+dC_ss_ndRsn = (dCcssdRsn*c_s_n_mat)';
+
+JG(ind_jn,ind_Rsn) = 2/p.Faraday .* (p.k_n/2) .* ((-2*c_ss_n .* c_en ) + (c_en .* p.c_s_n_max)) .* dC_ss_ndRsn ./ sqrt((c_en .* p.c_s_n_max .* c_ss_n) - (c_en .* (c_ss_n.^2))) .* sinh(aFRT * eta_n) ...
+                     + 2/p.Faraday .* i_0n .* cosh(aFRT* eta_n) .* aFRT .* -1 .* (dUnref.*dC_ss_ndRsn);
+
+% Cathode
+dCcssdRsp = [-5*-3*3465*(p.D_s_p0^2)/(p.R_s_p^6), -3*-4*3465*(p.D_s_p0)/(11*(p.R_s_p^4)), -1*-3465/(165*(p.R_s_p^2))];
+dC_ss_pdRsp = (dCcssdRsp*c_s_p_mat)';
+
+JG(ind_jp,ind_Rsp) = 2/p.Faraday .* (p.k_p/2) .* ((-2*c_ss_p .* c_ep ) + (c_ep .* p.c_s_p_max)) .* dC_ss_pdRsp ./ sqrt((c_ep .* p.c_s_p_max .* c_ss_p) - (c_ep .* (c_ss_p.^2))) .* sinh(aFRT * eta_p) ...
+                     + 2/p.Faraday .* i_0p .* cosh(aFRT* eta_p) .* aFRT .* -1 .* (dUpref.*dC_ss_pdRsp);
+                 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 % [DONE] Jacobian of jp w.r.t. k_p
 JG(ind_jp,ind_kp) = 2/p.Faraday .* sinh(aFRT * eta_p) .* ((p.c_s_p_max - c_ss_p) .* c_ss_p .* c_ep).^p.alph;

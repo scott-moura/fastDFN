@@ -182,7 +182,10 @@ if(nargout > 4)
     B2(ind_iep) = p.F3_iep;
 end
 
-%% Potential in Electrolyte Phase: phi_e(x,t)... i am going to ignore variations of c_e w.r.t. kappa
+%% Potential in Electrolyte Phase: phi_e(x,t)... 
+% 2016.10.25
+% Disregarding the kappa(c_e) and dactivity(c_e) jacobians for now.
+
 % % System matrices
 % [F1_pe,F2_pe,F3_pe] = phi_e_mats_new(p,c_ex);
 
@@ -241,8 +244,6 @@ bet_mat = sparse(diag(bet));
 %Kap_eff_D_org = bet_org*Kap_eff;% When dactivity is constant
 Kap_eff_D = bet_mat*Kap_eff;
 
-% No effect on boundary? i.e., kappa_effN, kappa_eff0
-% Incomplete to add 'Derivative w.r.t c_e'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Form Matrices
